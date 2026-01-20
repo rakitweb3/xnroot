@@ -1,0 +1,2492 @@
+<!doctype html>
+<html lang="id" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="origin" />
+  <title>XnRoot - Perpangkatan &amp; Bentuk Akar</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="assets/js/storage.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&amp;display=swap"
+    rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    }
+
+    .card-glass {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .badge-glow {
+      animation: badgePulse 2s ease-in-out infinite;
+    }
+
+    @keyframes badgePulse {
+
+      0%,
+      100% {
+        transform: scale(1);
+        filter: brightness(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+        filter: brightness(1.2);
+      }
+    }
+
+    @keyframes badgePopup {
+      0% {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+      }
+
+      100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    .badge-popup {
+      animation: badgePopup 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-slide-in {
+      animation: slideIn 0.5s ease-out forwards;
+    }
+
+    .toast {
+      animation: slideIn 0.3s ease-out;
+    }
+
+    .progress-bar {
+      transition: width 0.3s ease;
+    }
+
+    .level-card {
+      transition: all 0.3s ease;
+    }
+
+    .level-card:hover:not(.locked) {
+      transform: scale(1.02);
+    }
+
+    .option-btn {
+      transition: all 0.2s ease;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      transform: translateX(5px);
+    }
+
+    .video-container {
+      position: relative;
+      padding-bottom: 56.25%;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .video-container iframe {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .timer-warning {
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    .phase-card {
+      transition: all 0.3s ease;
+    }
+
+    .phase-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
+  <style>
+    @view-transition {
+      navigation: auto;
+    }
+  </style>
+</head>
+
+<body class="h-full gradient-bg text-white overflow-auto">
+  <div id="app" class="min-h-full w-full"><!-- Badge Notification Popup -->
+    <div id="badge-notification" class="hidden fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50">
+      <div class="card-glass rounded-2xl p-8 text-center badge-popup max-w-sm shadow-2xl">
+        <p class="text-6xl mb-4" id="badge-icon-notif">🏆</p>
+        <p class="text-2xl font-bold mb-2 text-yellow-400">Badge Baru!</p>
+        <p class="text-xl mb-2 font-bold" id="badge-name-notif">Explorer</p>
+        <p class="text-sm text-gray-300" id="badge-desc-notif">Mendaftar dan memulai petualangan</p><button
+          onclick="closeBadgeNotification()"
+          class="mt-6 px-6 py-2 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-lg hover:opacity-90 transition-opacity font-bold">
+          Lanjutkan! 🎯 </button>
+      </div>
+    </div><!-- Toast Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm"></div><!-- Loading Screen -->
+    <div id="loading-screen" class="fixed inset-0 gradient-bg flex items-center justify-center z-50">
+      <div class="text-center">
+        <div class="w-16 h-16 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin mx-auto mb-4">
+        </div>
+        <p class="text-xl text-indigo-300">Memuat aplikasi...</p>
+      </div>
+    </div><!-- Navigation -->
+    <nav class="sticky top-0 z-40 card-glass py-4 px-4 md:px-6">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <h1 id="nav-title"
+            class="text-2xl md:text-4xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            XnRoot</h1>
+        </div>
+        <div class="flex items-center gap-1 md:gap-2 overflow-x-auto"><button onclick="showSection('home')"
+            class="nav-btn px-2 md:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors font-medium text-sm md:text-base whitespace-nowrap">
+            <span class="text-xl md:text-2xl">🏠</span> <span class="hidden sm:inline">Beranda</span> </button> <button
+            onclick="showSection('cptp')"
+            class="nav-btn px-2 md:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors font-medium text-sm md:text-base whitespace-nowrap">
+            <span class="text-xl md:text-2xl">📚</span> <span class="hidden sm:inline">CP/TP</span> </button> <button
+            onclick="showSection('inquiry')"
+            class="nav-btn px-2 md:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors font-medium text-sm md:text-base whitespace-nowrap">
+            <span class="text-xl md:text-2xl">🔬</span> <span class="hidden sm:inline">Inkuiri</span> </button> <button
+            onclick="showSection('guide')"
+            class="nav-btn px-2 md:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors font-medium text-sm md:text-base whitespace-nowrap">
+            <span class="text-xl md:text-2xl">📖</span> <span class="hidden sm:inline">Petunjuk</span> </button> <button
+            onclick="showSection('leaderboard')"
+            class="nav-btn px-2 md:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors font-medium text-sm md:text-base whitespace-nowrap">
+            <span class="text-xl md:text-2xl">🏆</span> <span class="hidden sm:inline">Peringkat</span> </button>
+          <button onclick="showSection('developer')"
+            class="nav-btn px-2 md:px-4 py-2 rounded-lg hover:bg-white/10 transition-colors font-medium text-sm md:text-base whitespace-nowrap">
+            <span class="text-xl md:text-2xl">👨‍💻</span> <span class="hidden sm:inline">Developer</span> </button>
+          <div id="user-score"
+            class="hidden lg:flex items-center gap-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 px-3 py-2 rounded-full border border-yellow-500/30">
+            <span class="text-xl">⭐</span> <span id="total-score-display" class="text-lg font-bold">0</span>
+          </div>
+        </div>
+      </div>
+    </nav><!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 md:px-6 py-6 md:py-8"><!-- Home Section -->
+      <section id="home-section" class="space-y-8"><!-- Welcome Banner -->
+        <div class="card-glass rounded-3xl p-6 md:p-10 text-center animate-slide-in">
+          <div class="text-6xl mb-4">
+            👋
+          </div>
+          <h2 id="welcome-title"
+            class="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Selamat Datang di XnRoot!</h2>
+          <p id="welcome-desc" class="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed">Petualangan
+            matematika interaktif dengan pendekatan inkuiri. Pelajari perpangkatan dan bentuk akar sambil bermain!</p>
+        </div><!-- Learning Materials -->
+        <div class="card-glass rounded-2xl p-6 md:p-8">
+          <h3 class="text-3xl md:text-4xl font-bold mb-6 flex items-center gap-3"><span
+              class="text-4xl md:text-5xl">📝</span> Materi Pembelajaran</h3><!-- Material Tabs -->
+          <div class="flex flex-wrap gap-3 mb-6"><button onclick="showMaterial('dasar')"
+              class="material-tab bg-purple-500 px-6 py-3 rounded-full text-base md:text-lg font-medium transition-all"
+              data-tab="dasar"> Perpangkatan Dasar </button> <button onclick="showMaterial('nol')"
+              class="material-tab bg-white/10 px-6 py-3 rounded-full text-base md:text-lg font-medium transition-all hover:bg-white/20"
+              data-tab="nol"> Pangkat Nol &amp; Negatif </button> <button onclick="showMaterial('pecahan')"
+              class="material-tab bg-white/10 px-6 py-3 rounded-full text-base md:text-lg font-medium transition-all hover:bg-white/20"
+              data-tab="pecahan"> Pangkat Pecahan &amp; Akar </button>
+          </div><!-- Video Section -->
+          <div class="mb-6">
+            <div class="flex items-center gap-3 mb-4"><span class="text-3xl md:text-4xl">📺</span>
+              <h4 class="text-2xl md:text-3xl font-bold">Video Pembelajaran</h4>
+            </div>
+            <div id="video-content"></div>
+          </div><!-- Material Content -->
+          <div class="mb-6">
+            <div class="flex items-center gap-3 mb-4"><span class="text-3xl md:text-4xl">📚</span>
+              <h4 class="text-2xl md:text-3xl font-bold">Materi Interaktif</h4>
+            </div>
+            <div id="material-content" class="bg-black/20 rounded-xl p-6 md:p-8 text-base md:text-lg leading-relaxed">
+              <!-- Content loaded dynamically -->
+            </div>
+          </div><!-- Interactive Explorer -->
+          <div class="bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl p-6 border border-indigo-500/30">
+            <h4 class="font-bold text-xl md:text-2xl mb-4 flex items-center gap-3"><span
+                class="text-2xl md:text-3xl">🔬</span> Eksplorasi Interaktif</h4><!-- Mode Selector -->
+            <div class="flex flex-wrap gap-2 mb-6"><button onclick="setExplorerMode('basic')" id="mode-basic"
+                class="explorer-mode-btn bg-indigo-500 px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                Perpangkatan Dasar </button> <button onclick="setExplorerMode('zero-negative')" id="mode-zero-negative"
+                class="explorer-mode-btn bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                Pangkat 0 &amp; Negatif </button> <button onclick="setExplorerMode('fraction-root')"
+                id="mode-fraction-root"
+                class="explorer-mode-btn bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-sm font-medium transition-all">
+                Pangkat Pecahan &amp; Akar </button>
+            </div><!-- Basic Mode -->
+            <div id="explorer-basic" class="explorer-content">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label class="block text-base md:text-lg text-gray-300 mb-2" for="exp-base">Basis (a):</label>
+                  <input type="number" id="exp-base" value="2"
+                    class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-lg text-white focus:outline-none focus:border-indigo-500"
+                    onchange="calculateExponent()">
+                </div>
+                <div><label class="block text-base md:text-lg text-gray-300 mb-2" for="exp-power">Pangkat (n):</label>
+                  <input type="number" id="exp-power" value="3"
+                    class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-lg text-white focus:outline-none focus:border-indigo-500"
+                    onchange="calculateExponent()">
+                </div>
+              </div>
+              <div class="mt-4 p-6 bg-black/30 rounded-lg text-center">
+                <p class="text-2xl md:text-3xl lg:text-4xl font-bold" id="exp-result">2³ = 2 × 2 × 2 = 8</p>
+                <p class="text-base md:text-lg text-gray-400 mt-3" id="exp-explanation">Artinya: 2 dikalikan dengan
+                  dirinya sendiri sebanyak 3 kali</p>
+              </div>
+            </div><!-- Zero & Negative Mode -->
+            <div id="explorer-zero-negative" class="explorer-content hidden">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div><label class="block text-base md:text-lg text-gray-300 mb-2" for="zn-base">Basis (a):</label>
+                  <input type="number" id="zn-base" value="2"
+                    class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-lg text-white focus:outline-none focus:border-yellow-500"
+                    onchange="calculateZeroNegative()">
+                </div>
+                <div><label class="block text-base md:text-lg text-gray-300 mb-2" for="zn-power">Pangkat (n):</label>
+                  <input type="number" id="zn-power" value="0" step="1"
+                    class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-lg text-white focus:outline-none focus:border-yellow-500"
+                    onchange="calculateZeroNegative()">
+                </div>
+              </div>
+              <div class="mt-4 space-y-3">
+                <div class="p-6 bg-black/30 rounded-lg">
+                  <p class="text-2xl md:text-3xl font-bold text-center mb-3" id="zn-result">2⁻² = 1</p>
+                  <p class="text-base md:text-lg text-gray-400 text-center" id="zn-explanation">Setiap bilangan (selain
+                    0) pangkat 0 = 1</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3"><button
+                    onclick="document.getElementById('zn-power').value = '0'; calculateZeroNegative()"
+                    class="bg-blue-500/20 border border-blue-500/30 rounded-lg px-4 py-3 hover:bg-blue-500/30 transition-all">
+                    <p class="font-bold text-blue-300">Pangkat 0</p>
+                    <p class="text-sm text-gray-400">a⁰ = 1</p>
+                  </button> <button onclick="document.getElementById('zn-power').value = '-1'; calculateZeroNegative()"
+                    class="bg-orange-500/20 border border-orange-500/30 rounded-lg px-4 py-3 hover:bg-orange-500/30 transition-all">
+                    <p class="font-bold text-orange-300">Pangkat -1</p>
+                    <p class="text-sm text-gray-400">a⁻¹ = 1/a</p>
+                  </button> <button onclick="document.getElementById('zn-power').value = '-3'; calculateZeroNegative()"
+                    class="bg-red-500/20 border border-red-500/30 rounded-lg px-4 py-3 hover:bg-red-500/30 transition-all">
+                    <p class="font-bold text-red-300">Pangkat -3</p>
+                    <p class="text-sm text-gray-400">a⁻ⁿ = 1/aⁿ</p>
+                  </button>
+                </div>
+              </div>
+            </div><!-- Fraction & Root Mode -->
+            <div id="explorer-fraction-root" class="explorer-content hidden">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div><label class="block text-base md:text-lg text-gray-300 mb-2" for="fr-base">Basis (a):</label>
+                  <input type="number" id="fr-base" value="16"
+                    class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-lg text-white focus:outline-none focus:border-purple-500"
+                    onchange="calculateFractionRoot()">
+                </div>
+                <div><label class="block text-base md:text-lg text-gray-300 mb-2" for="fr-numerator">Pembilang
+                    (m):</label> <input type="number" id="fr-numerator" value="1"
+                    class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-lg text-white focus:outline-none focus:border-purple-500"
+                    onchange="calculateFractionRoot()">
+                </div>
+                <div><label class="block text-base md:text-lg text-gray-300 mb-2" for="fr-denominator">Penyebut
+                    (n):</label> <input type="number" id="fr-denominator" value="2" min="1"
+                    class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-lg text-white focus:outline-none focus:border-purple-500"
+                    onchange="calculateFractionRoot()">
+                </div>
+              </div>
+              <div class="mt-4 space-y-3">
+                <div class="p-6 bg-black/30 rounded-lg">
+                  <p class="text-2xl md:text-3xl font-bold text-center mb-3" id="fr-result">16^(1/2) = √16 = 4</p>
+                  <p class="text-base md:text-lg text-gray-400 text-center" id="fr-explanation">a^(m/n) = nv(a?) atau
+                    (nva)?</p>
+                </div>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3"><button onclick="setFractionExample(16, 1, 2)"
+                    class="bg-green-500/20 border border-green-500/30 rounded-lg px-3 py-3 hover:bg-green-500/30 transition-all">
+                    <p class="font-bold text-green-300 text-sm">√16</p>
+                    <p class="text-xs text-gray-400">16^(1/2)</p>
+                  </button> <button onclick="setFractionExample(27, 1, 3)"
+                    class="bg-blue-500/20 border border-blue-500/30 rounded-lg px-3 py-3 hover:bg-blue-500/30 transition-all">
+                    <p class="font-bold text-blue-300 text-sm">³√27</p>
+                    <p class="text-xs text-gray-400">27^(1/3)</p>
+                  </button> <button onclick="setFractionExample(8, 2, 3)"
+                    class="bg-purple-500/20 border border-purple-500/30 rounded-lg px-3 py-3 hover:bg-purple-500/30 transition-all">
+                    <p class="font-bold text-purple-300 text-sm">8^(2/3)</p>
+                    <p class="text-xs text-gray-400">(³√8)²</p>
+                  </button> <button onclick="setFractionExample(4, 3, 2)"
+                    class="bg-pink-500/20 border border-pink-500/30 rounded-lg px-3 py-3 hover:bg-pink-500/30 transition-all">
+                    <p class="font-bold text-pink-300 text-sm">4^(3/2)</p>
+                    <p class="text-xs text-gray-400">(√4)³</p>
+                  </button>
+                </div>
+                <div class="bg-purple-500/10 rounded-lg p-4 border border-purple-500/20">
+                  <p class="text-sm font-semibold text-purple-300 mb-2">💡 Tips Perhitungan:</p>
+                  <ul class="text-xs md:text-sm text-gray-300 space-y-1">
+                    <li>• a^(1/n) = ⁿ√a (pangkat 1/n sama dengan akar pangkat n)</li>
+                    <li>• a^(m/n) = ⁿ√(aᵐ) = (ⁿ√a)ᵐ (bisa hitung pangkat dulu atau akar dulu)</li>
+                    <li>• Contoh: 8^(2/3) = ³√(8²) = ³√64 = 4 ATAU (³√8)² = 2² = 4</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- Game Section -->
+        <div class="card-glass rounded-2xl p-6 md:p-8">
+          <h3 class="text-3xl md:text-4xl font-bold mb-3 flex items-center gap-3"><span
+              class="text-4xl md:text-5xl">🎮</span> Quest Arena - Tantangan Matematika</h3>
+          <p class="text-lg md:text-xl text-gray-400 mb-6">Uji pemahamanmu dengan soal kontekstual! Kumpulkan badges dan
+            raih skor tertinggi!</p><!-- Player Registration -->
+          <div id="player-registration"
+            class="mb-6 p-6 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-xl border border-cyan-500/30">
+            <h4 class="font-bold text-lg mb-4">📝 Daftar untuk Bermain</h4>
+            <div class="flex flex-col sm:flex-row gap-3"><input type="text" id="player-name-input"
+                placeholder="Masukkan nama kamu"
+                class="flex-1 bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-cyan-500"
+                maxlength="20"> <button onclick="registerPlayer()"
+                class="bg-gradient-to-r from-cyan-500 to-blue-500 px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                Mulai Petualangan! 🚀 </button>
+            </div>
+          </div><!-- Level Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8"><!-- Level 1 -->
+            <div id="level-1-card"
+              class="level-card bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-xl p-6 border-2 border-green-500/30 cursor-pointer"
+              onclick="startLevel(1)">
+              <div class="flex items-center justify-between mb-4"><span class="text-4xl">🎯</span> <span
+                  id="level-1-status" class="px-3 py-1 bg-green-500/30 rounded-full text-xs font-bold">Tersedia</span>
+              </div>
+              <h4 class="font-bold text-xl mb-2 text-green-300">Level 1</h4>
+              <p class="text-lg font-medium mb-2">Perpangkatan Dasar</p>
+              <p class="text-sm text-gray-400 mb-4">10 Soal • 5 menit/soal</p>
+              <div class="flex items-center justify-between"><span class="text-sm text-gray-400">Skor:</span> <span
+                  id="level-1-score" class="font-bold text-green-400">0/1000</span>
+              </div>
+              <div class="mt-2 h-2 bg-black/30 rounded-full overflow-hidden">
+                <div id="level-1-progress" class="h-full bg-gradient-to-r from-green-500 to-emerald-500 progress-bar"
+                  style="width: 0%"></div>
+              </div>
+            </div><!-- Level 2 -->
+            <div id="level-2-card"
+              class="level-card locked bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border-2 border-yellow-500/30 opacity-50 cursor-not-allowed"
+              onclick="startLevel(2)">
+              <div class="flex items-center justify-between mb-4"><span class="text-4xl">🎯</span> <span
+                  id="level-2-status" class="px-3 py-1 bg-gray-500/30 rounded-full text-xs font-bold">🔒 Terkunci</span>
+              </div>
+              <h4 class="font-bold text-xl mb-2 text-yellow-300">Level 2</h4>
+              <p class="text-lg font-medium mb-2">Pangkat Nol &amp; Negatif</p>
+              <p class="text-sm text-gray-400 mb-4">10 Soal • 5 menit/soal</p>
+              <div class="flex items-center justify-between"><span class="text-sm text-gray-400">Skor:</span> <span
+                  id="level-2-score" class="font-bold text-yellow-400">0/1000</span>
+              </div>
+              <div class="mt-2 h-2 bg-black/30 rounded-full overflow-hidden">
+                <div id="level-2-progress" class="h-full bg-gradient-to-r from-yellow-500 to-orange-500 progress-bar"
+                  style="width: 0%"></div>
+              </div>
+            </div><!-- Level 3 -->
+            <div id="level-3-card"
+              class="level-card locked bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border-2 border-purple-500/30 opacity-50 cursor-not-allowed"
+              onclick="startLevel(3)">
+              <div class="flex items-center justify-between mb-4"><span class="text-4xl">🎯</span> <span
+                  id="level-3-status" class="px-3 py-1 bg-gray-500/30 rounded-full text-xs font-bold">🔒 Terkunci</span>
+              </div>
+              <h4 class="font-bold text-xl mb-2 text-purple-300">Level 3</h4>
+              <p class="text-lg font-medium mb-2">Pangkat Pecahan &amp; Akar</p>
+              <p class="text-sm text-gray-400 mb-4">10 Soal • 5 menit/soal</p>
+              <div class="flex items-center justify-between"><span class="text-sm text-gray-400">Skor:</span> <span
+                  id="level-3-score" class="font-bold text-purple-400">0/1000</span>
+              </div>
+              <div class="mt-2 h-2 bg-black/30 rounded-full overflow-hidden">
+                <div id="level-3-progress" class="h-full bg-gradient-to-r from-purple-500 to-pink-500 progress-bar"
+                  style="width: 0%"></div>
+              </div>
+            </div>
+          </div><!-- Badges Section -->
+          <div class="p-6 bg-black/20 rounded-xl">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="font-bold text-lg flex items-center gap-2"><span>🏆</span> Koleksi Badges <span
+                  id="badge-count" class="text-sm text-gray-400">(0/17)</span></h4>
+            </div>
+            <p class="text-sm text-gray-400 mb-4">Kumpulkan badges dengan menyelesaikan aktivitas dan tantangan!</p>
+            <div id="badges-container"
+              class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4 mb-6">
+              <!-- Badges rendered here -->
+            </div><!-- Badge Legend -->
+            <div
+              class="p-4 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-lg border border-indigo-500/20">
+              <p class="text-sm font-semibold mb-3 flex items-center gap-2"><span>📋</span> Cara Mendapat Badges:</p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-gray-300">
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Explorer: Daftar akun</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Video Watcher: Tonton video</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Material Reader: Baca 3 materi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Experimenter: 5x eksperimen</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Learner: Selesaikan Level 1</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Thinker: Selesaikan Level 2</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Master: Selesaikan Level 3</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Perfectionist: Skor 1000</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Champion: Skor = 900</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Speedster: Cepat + skor tinggi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Comeback Kid: Ulangi level</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Three Star: Selesaikan 3 level</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Perfect Trilogy: =800 semua</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Inquiry Master: Baca inkuiri</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Persistent: Jawab 50 soal</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Accurate: 10 benar berturut</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span>✓</span> <span>Scholar: Baca CP/TP</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section><!-- CP/TP Section -->
+      <section id="cptp-section" class="hidden space-y-6">
+        <div class="card-glass rounded-2xl p-6 md:p-8">
+          <h3 class="text-3xl md:text-4xl font-bold mb-6 flex items-center gap-3"><span class="text-4xl">🎯</span>
+            Capaian Pembelajaran &amp; Tujuan Pembelajaran</h3><!-- Capaian Pembelajaran -->
+          <div class="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-6 border border-blue-500/30 mb-6">
+            <h4 class="text-2xl md:text-3xl font-bold mb-4 text-cyan-300 flex items-center gap-2"><span>📚</span>
+              Capaian Pembelajaran (CP)</h4>
+            <p class="text-base md:text-lg text-gray-300 leading-relaxed mb-4">Peserta didik dapat memahami,
+              menggunakan, dan mengevaluasi konsep eksponen (bilangan berpangkat) dan bentuk akar dalam menyelesaikan
+              masalah, termasuk masalah-masalah kontekstual.</p>
+            <div class="bg-black/20 rounded-lg p-4">
+              <p class="text-sm text-gray-400"><strong>Fase:</strong> E (Kelas X SMA/MA)</p>
+              <p class="text-sm text-gray-400 mt-1"><strong>Mata Pelajaran:</strong> Matematika</p>
+              <p class="text-sm text-gray-400 mt-1"><strong>Elemen:</strong> Bilangan</p>
+            </div>
+          </div><!-- Tujuan Pembelajaran -->
+          <div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-purple-500/30">
+            <h4 class="text-2xl md:text-3xl font-bold mb-4 text-purple-300 flex items-center gap-2"><span>🎯</span>
+              Tujuan Pembelajaran (TP)</h4>
+            <div class="space-y-4">
+              <div class="bg-black/20 rounded-lg p-5">
+                <div class="flex items-start gap-3">
+                  <div
+                    class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-500 rounded-full flex items-center justify-center font-bold">
+                    1
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-bold text-lg md:text-xl text-green-300 mb-2">Memahami Konsep Perpangkatan</h5>
+                    <p class="text-sm md:text-base text-gray-300">Peserta didik dapat menjelaskan dan menggunakan notasi
+                      perpangkatan, termasuk perpangkatan bilangan bulat positif, nol, dan negatif.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-black/20 rounded-lg p-5">
+                <div class="flex items-start gap-3">
+                  <div
+                    class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center font-bold">
+                    2
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-bold text-lg md:text-xl text-yellow-300 mb-2">Menerapkan Sifat-Sifat Eksponen</h5>
+                    <p class="text-sm md:text-base text-gray-300">Peserta didik dapat menggunakan sifat-sifat operasi
+                      pada bilangan berpangkat untuk menyederhanakan bentuk aljabar dan menyelesaikan masalah.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-black/20 rounded-lg p-5">
+                <div class="flex items-start gap-3">
+                  <div
+                    class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center font-bold">
+                    3
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-bold text-lg md:text-xl text-purple-300 mb-2">Memahami Bentuk Akar dan Pangkat
+                      Pecahan</h5>
+                    <p class="text-sm md:text-base text-gray-300">Peserta didik dapat menjelaskan hubungan antara bentuk
+                      akar dengan pangkat pecahan, serta melakukan operasi pada bentuk akar.</p>
+                  </div>
+                </div>
+              </div>
+              <div class="bg-black/20 rounded-lg p-5">
+                <div class="flex items-start gap-3">
+                  <div
+                    class="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-red-500 to-rose-500 rounded-full flex items-center justify-center font-bold">
+                    4
+                  </div>
+                  <div class="flex-1">
+                    <h5 class="font-bold text-lg md:text-xl text-red-300 mb-2">Menyelesaikan Masalah Kontekstual</h5>
+                    <p class="text-sm md:text-base text-gray-300">Peserta didik dapat mengaplikasikan konsep
+                      perpangkatan dan bentuk akar untuk menyelesaikan permasalahan nyata dalam kehidupan sehari-hari.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section><!-- Inquiry Section -->
+      <section id="inquiry-section" class="hidden space-y-6">
+        <div class="card-glass rounded-2xl p-6 md:p-8">
+          <h3 class="text-3xl md:text-4xl font-bold mb-4 flex items-center gap-3"><span class="text-4xl">🔬</span>
+            Sintaks Model Pembelajaran Inkuiri</h3>
+          <p class="text-base md:text-lg text-gray-400 mb-8">Pendekatan pembelajaran berbasis penyelidikan yang
+            mendorong siswa untuk aktif menemukan konsep matematika secara mandiri.</p><!-- Inquiry Phases -->
+          <div class="space-y-6"><!-- Phase 1 -->
+            <div
+              class="phase-card bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-6 border border-blue-500/30 cursor-pointer"
+              onclick="togglePhase('phase1')">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-xl md:text-2xl font-bold text-cyan-300 flex items-center gap-3"><span
+                    class="text-3xl">1️⃣</span> Orientasi Masalah</h4><span id="phase1-icon" class="text-2xl">📋</span>
+              </div>
+              <p class="text-sm md:text-base text-gray-300 mb-4">Guru menyajikan masalah kontekstual untuk memicu rasa
+                ingin tahu siswa</p>
+              <div id="phase1-content" class="hidden mt-4 space-y-3 bg-black/20 rounded-lg p-5">
+                <p class="text-base md:text-lg text-white font-semibold">📝 Contoh Implementasi:</p>
+                <p class="text-sm md:text-base text-gray-300">"Perhatikan pertumbuhan bakteri di laboratorium! Satu
+                  bakteri membelah menjadi 2, kemudian 4, lalu 8... Berapa jumlahnya setelah 10 kali pembelahan?
+                  Bagaimana cara menghitungnya dengan cepat?"</p>
+                <div class="bg-blue-500/10 rounded-lg p-4 mt-3">
+                  <p class="text-sm font-semibold text-cyan-300 mb-2">🎯 Tujuan Fase:</p>
+                  <ul class="list-disc list-inside text-xs md:text-sm text-gray-300 space-y-1">
+                    <li>Membangkitkan rasa ingin tahu siswa</li>
+                    <li>Mengaitkan dengan pengalaman nyata</li>
+                    <li>Merumuskan pertanyaan penelitian</li>
+                  </ul>
+                </div>
+              </div>
+            </div><!-- Phase 2 -->
+            <div
+              class="phase-card bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-6 border border-green-500/30 cursor-pointer"
+              onclick="togglePhase('phase2')">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-xl md:text-2xl font-bold text-green-300 flex items-center gap-3"><span
+                    class="text-3xl">2️⃣</span> Merumuskan Hipotesis</h4><span id="phase2-icon"
+                  class="text-2xl">💭</span>
+              </div>
+              <p class="text-sm md:text-base text-gray-300 mb-4">Siswa membuat dugaan sementara tentang pola atau aturan
+                yang berlaku</p>
+              <div id="phase2-content" class="hidden mt-4 space-y-3 bg-black/20 rounded-lg p-5">
+                <p class="text-base md:text-lg text-white font-semibold">📝 Contoh Implementasi:</p>
+                <p class="text-sm md:text-base text-gray-300">Siswa berhipotesis: "Mungkin ada pola perkalian berulang
+                  di sini. Sepertinya kita mengalikan 2 sebanyak n kali untuk pembelahan ke-n."</p>
+                <div class="bg-green-500/10 rounded-lg p-4 mt-3">
+                  <p class="text-sm font-semibold text-green-300 mb-2">🎯 Tujuan Fase:</p>
+                  <ul class="list-disc list-inside text-xs md:text-sm text-gray-300 space-y-1">
+                    <li>Melatih berpikir logis dan prediksi</li>
+                    <li>Mengembangkan kemampuan analisis</li>
+                    <li>Membangun pemahaman awal konsep</li>
+                  </ul>
+                </div>
+              </div>
+            </div><!-- Phase 3 -->
+            <div
+              class="phase-card bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-yellow-500/30 cursor-pointer"
+              onclick="togglePhase('phase3')">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-xl md:text-2xl font-bold text-yellow-300 flex items-center gap-3"><span
+                    class="text-3xl">3️⃣</span> Mengumpulkan Data</h4><span id="phase3-icon" class="text-2xl">📊</span>
+              </div>
+              <p class="text-sm md:text-base text-gray-300 mb-4">Siswa melakukan eksplorasi dan mengumpulkan informasi
+                untuk menguji hipotesis</p>
+              <div id="phase3-content" class="hidden mt-4 space-y-3 bg-black/20 rounded-lg p-5">
+                <p class="text-base md:text-lg text-white font-semibold">📝 Contoh Implementasi:</p>
+                <p class="text-sm md:text-base text-gray-300">Siswa menggunakan kalkulator eksplorasi untuk mencoba
+                  berbagai basis dan pangkat: 2³, 2⁴, 2⁵... Mereka mencatat pola hasilnya dan membandingkan dengan
+                  hipotesis awal.</p>
+                <div class="bg-yellow-500/10 rounded-lg p-4 mt-3">
+                  <p class="text-sm font-semibold text-yellow-300 mb-2">🎯 Tujuan Fase:</p>
+                  <ul class="list-disc list-inside text-xs md:text-sm text-gray-300 space-y-1">
+                    <li>Mengumpulkan data secara sistematis</li>
+                    <li>Menggunakan alat bantu (kalkulator, tabel)</li>
+                    <li>Mengorganisir informasi yang ditemukan</li>
+                  </ul>
+                </div>
+              </div>
+            </div><!-- Phase 4 -->
+            <div
+              class="phase-card bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-purple-500/30 cursor-pointer"
+              onclick="togglePhase('phase4')">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-xl md:text-2xl font-bold text-purple-300 flex items-center gap-3"><span
+                    class="text-3xl">4️⃣</span> Menguji Hipotesis</h4><span id="phase4-icon" class="text-2xl">🧪</span>
+              </div>
+              <p class="text-sm md:text-base text-gray-300 mb-4">Siswa menganalisis data dan menguji kebenaran hipotesis
+                yang telah dibuat</p>
+              <div id="phase4-content" class="hidden mt-4 space-y-3 bg-black/20 rounded-lg p-5">
+                <p class="text-base md:text-lg text-white font-semibold">📝 Contoh Implementasi:</p>
+                <p class="text-sm md:text-base text-gray-300">"Mari kita cek: 2³ = 8 ✓, 2⁴ = 16 ✓, 2⁵ = 32 ✓. Pola
+                  terbukti! Notasi an memang berarti mengalikan a sebanyak n kali. Hipotesis kita benar!"</p>
+                <div class="bg-purple-500/10 rounded-lg p-4 mt-3">
+                  <p class="text-sm font-semibold text-purple-300 mb-2">🎯 Tujuan Fase:</p>
+                  <ul class="list-disc list-inside text-xs md:text-sm text-gray-300 space-y-1">
+                    <li>Memvalidasi atau merevisi hipotesis</li>
+                    <li>Menggunakan bukti untuk argumentasi</li>
+                    <li>Mengembangkan pemikiran kritis</li>
+                  </ul>
+                </div>
+              </div>
+            </div><!-- Phase 5 -->
+            <div
+              class="phase-card bg-gradient-to-r from-red-500/20 to-rose-500/20 rounded-xl p-6 border border-red-500/30 cursor-pointer"
+              onclick="togglePhase('phase5')">
+              <div class="flex items-center justify-between mb-3">
+                <h4 class="text-xl md:text-2xl font-bold text-red-300 flex items-center gap-3"><span
+                    class="text-3xl">5️⃣</span> Merumuskan Kesimpulan</h4><span id="phase5-icon"
+                  class="text-2xl">📝</span>
+              </div>
+              <p class="text-sm md:text-base text-gray-300 mb-4">Siswa menarik kesimpulan berdasarkan hasil investigasi
+                dan menghubungkan dengan konsep matematika</p>
+              <div id="phase5-content" class="hidden mt-4 space-y-3 bg-black/20 rounded-lg p-5">
+                <p class="text-base md:text-lg text-white font-semibold">📝 Contoh Implementasi:</p>
+                <p class="text-sm md:text-base text-gray-300">"Kesimpulan: Perpangkatan an adalah operasi perkalian
+                  berulang dimana a dikalikan dengan dirinya sendiri sebanyak n kali. Konsep ini sangat berguna untuk
+                  menghitung pertumbuhan eksponensial seperti populasi bakteri, bunga bank, dan teknologi."</p>
+                <div class="bg-red-500/10 rounded-lg p-4 mt-3">
+                  <p class="text-sm font-semibold text-red-300 mb-2">🎯 Tujuan Fase:</p>
+                  <ul class="list-disc list-inside text-xs md:text-sm text-gray-300 space-y-1">
+                    <li>Membangun konsep matematika yang solid</li>
+                    <li>Menghubungkan dengan konteks nyata</li>
+                    <li>Mengkomunikasikan temuan secara jelas</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div><!-- Inquiry Benefits -->
+          <div
+            class="mt-8 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl p-6 border border-indigo-500/30">
+            <h4 class="text-xl md:text-2xl font-bold mb-4 flex items-center gap-2"><span>🌟</span> Manfaat Pembelajaran
+              Inkuiri</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-black/20 rounded-lg p-4">
+                <p class="font-semibold text-indigo-300 mb-2">🧠 Pengembangan Kognitif</p>
+                <p class="text-sm text-gray-300">Melatih berpikir kritis, analitis, dan pemecahan masalah secara mandiri
+                </p>
+              </div>
+              <div class="bg-black/20 rounded-lg p-4">
+                <p class="font-semibold text-purple-300 mb-2">⚡ Pembelajaran Aktif</p>
+                <p class="text-sm text-gray-300">Siswa menjadi pusat pembelajaran dan aktif mengkonstruksi pengetahuan
+                </p>
+              </div>
+              <div class="bg-black/20 rounded-lg p-4">
+                <p class="font-semibold text-pink-300 mb-2">📚 Pemahaman Mendalam</p>
+                <p class="text-sm text-gray-300">Konsep dipahami lebih dalam karena ditemukan sendiri, bukan dihafal</p>
+              </div>
+              <div class="bg-black/20 rounded-lg p-4">
+                <p class="font-semibold text-cyan-300 mb-2">🔗 Kontekstual</p>
+                <p class="text-sm text-gray-300">Menghubungkan matematika dengan kehidupan nyata dan aplikasinya</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section><!-- Guide Section -->
+      <section id="guide-section" class="hidden space-y-6">
+        <div class="card-glass rounded-2xl p-6 md:p-8">
+          <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><span class="text-3xl">📖</span> Petunjuk Bermain
+          </h3>
+          <div class="space-y-4">
+            <div class="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-4 border border-blue-500/30">
+              <h4 class="font-bold text-lg mb-2 flex items-center gap-2"><span>1️⃣</span> Daftar</h4>
+              <p class="text-gray-300">Masukkan nama kamu dan klik "Mulai Petualangan!" untuk memulai.</p>
+            </div>
+            <div class="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-xl p-4 border border-purple-500/30">
+              <h4 class="font-bold text-lg mb-2 flex items-center gap-2"><span>2️⃣</span> Pelajari Materi</h4>
+              <p class="text-gray-300">Tonton video dan baca materi pembelajaran untuk memahami konsep perpangkatan dan
+                bentuk akar.</p>
+            </div>
+            <div class="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-4 border border-green-500/30">
+              <h4 class="font-bold text-lg mb-2 flex items-center gap-2"><span>3️⃣</span> Mainkan Level</h4>
+              <p class="text-gray-300">Selesaikan setiap level dengan menjawab 10 soal. Setiap jawaban benar mendapat
+                100 poin. Kecepatan juga dihitung!</p>
+            </div>
+            <div
+              class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-4 border border-yellow-500/30">
+              <h4 class="font-bold text-lg mb-2 flex items-center gap-2"><span>4️⃣</span> Kumpulkan Badges</h4>
+              <p class="text-gray-300">Dapatkan 17 badges berbeda dengan menyelesaikan berbagai aktivitas dan tantangan!
+              </p>
+            </div>
+          </div>
+        </div>
+      </section><!-- Leaderboard Section -->
+      <section id="leaderboard-section" class="hidden">
+        <div class="card-glass rounded-2xl p-6 md:p-8">
+          <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><span class="text-3xl">🏆</span> Papan Peringkat
+          </h3>
+          <div id="leaderboard-content" class="space-y-3"><!-- Leaderboard rendered here -->
+          </div>
+        </div>
+      </section><!-- Developer Section -->
+      <section id="developer-section" class="hidden space-y-6">
+        <div class="card-glass rounded-2xl p-6 md:p-8">
+          <h3 class="text-3xl md:text-4xl font-bold mb-6 flex items-center gap-3"><span class="text-4xl">👨‍💻</span>
+            Profil Pengembang</h3><!-- Developer Card -->
+          <div
+            class="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-2xl p-8 border border-indigo-500/30 mb-6">
+            <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+              <div class="w-32 h-32 rounded-full bg-gradient-to-br from-cyan-500 to-purple-500 p-1 shadow-2xl">
+                <img src="assets/images/Profil_biografi.jpg" alt="Foto pengembang"
+                  class="w-full h-full rounded-full object-cover" loading="lazy">
+              </div>
+              <div class="flex-1 text-center md:text-left">
+                <h4 class="text-2xl md:text-3xl font-bold text-indigo-300 mb-2">Nayla Fitria Novindra</h4>
+                <p class="text-lg md:text-xl text-purple-300 mb-4">Mahasiswa Pendidikan Matematika</p>
+                <div class="space-y-2 text-sm md:text-base text-gray-300">
+                  <p class="flex items-center gap-2 justify-center md:justify-start"><span>🏫</span> <span>Universitas
+                      Muhammadiyah Metro (UMM)</span></p>
+                  <p class="flex items-center gap-2 justify-center md:justify-start"><span>📚</span> <span>Prodi
+                      Pendidikan Matematika</span></p>
+                  <p class="flex items-center gap-2 justify-center md:justify-start"><span>📅</span> <span>Angkatan
+                      2022</span></p>
+                </div>
+              </div>
+            </div>
+          </div><!-- Project Info -->
+          <div
+            class="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-6 border border-green-500/30 mb-6">
+            <h4 class="text-xl md:text-2xl font-bold mb-4 text-green-300 flex items-center gap-2"><span>📝</span>
+              Tentang Proyek</h4>
+            <p class="text-sm md:text-base text-gray-300 leading-relaxed">XnRoot adalah aplikasi pembelajaran matematika
+              interaktif yang dikembangkan dengan pendekatan model pembelajaran inkuiri. Aplikasi ini dirancang untuk
+              membantu siswa SMA/MA memahami konsep perpangkatan dan bentuk akar melalui eksplorasi mandiri, soal
+              kontekstual, dan sistem gamifikasi yang menarik.</p>
+          </div><!-- Features -->
+          <div
+            class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-yellow-500/30 mb-6">
+            <h4 class="text-xl md:text-2xl font-bold mb-4 text-yellow-300 flex items-center gap-2"><span>⭐</span> Fitur
+              Utama</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex items-start gap-3 bg-black/20 rounded-lg p-4"><span class="text-2xl">🎮</span>
+                <div>
+                  <p class="font-semibold text-white mb-1">Gamifikasi</p>
+                  <p class="text-sm text-gray-300">17 badges koleksi dan sistem skor</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-black/20 rounded-lg p-4"><span class="text-2xl">🔬</span>
+                <div>
+                  <p class="font-semibold text-white mb-1">Inkuiri</p>
+                  <p class="text-sm text-gray-300">5 fase pembelajaran berbasis inkuiri</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-black/20 rounded-lg p-4"><span class="text-2xl">📊</span>
+                <div>
+                  <p class="font-semibold text-white mb-1">Tracking Progress</p>
+                  <p class="text-sm text-gray-300">Papan peringkat dan statistik pemain</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 bg-black/20 rounded-lg p-4"><span class="text-2xl">🧪</span>
+                <div>
+                  <p class="font-semibold text-white mb-1">Eksplorasi Interaktif</p>
+                  <p class="text-sm text-gray-300">Kalkulator eksponen untuk bereksperimen</p>
+                </div>
+              </div>
+            </div>
+          </div><!-- Technology Stack -->
+          <div class="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-6 border border-blue-500/30 mb-6">
+            <h4 class="text-xl md:text-2xl font-bold mb-4 text-cyan-300 flex items-center gap-2"><span>💻</span>
+              Teknologi yang Digunakan</h4>
+            <div class="flex flex-wrap gap-3"><span
+                class="px-4 py-2 bg-black/30 rounded-full text-sm font-medium border border-cyan-500/30">HTML5</span>
+              <span class="px-4 py-2 bg-black/30 rounded-full text-sm font-medium border border-cyan-500/30">CSS3</span>
+              <span
+                class="px-4 py-2 bg-black/30 rounded-full text-sm font-medium border border-cyan-500/30">JavaScript</span>
+              <span class="px-4 py-2 bg-black/30 rounded-full text-sm font-medium border border-cyan-500/30">Tailwind
+                CSS</span> <span
+                class="px-4 py-2 bg-black/30 rounded-full text-sm font-medium border border-cyan-500/30">LocalStorage
+                API</span>
+            </div>
+          </div>
+
+          <!-- Storage Manager -->
+          <div class="bg-gradient-to-r from-red-500/20 to-rose-500/20 rounded-xl p-6 border border-red-500/30 mb-6">
+            <h4 class="text-xl md:text-2xl font-bold mb-4 text-red-300 flex items-center gap-2"><span>💾</span>
+              Storage Manager </h4>
+
+            <div class="space-y-4">
+              <!-- Storage Info -->
+              <div class="bg-black/30 rounded-lg p-4">
+                <p class="text-sm font-semibold text-gray-300 mb-2">Mode Penyimpanan:</p>
+                <p class="text-lg font-bold text-yellow-400" id="storage-mode-display">Offline (LocalStorage)</p>
+
+              </div>
+
+              <!-- Storage Stats -->
+              <div class="bg-black/30 rounded-lg p-4">
+                <p class="text-sm font-semibold text-gray-300 mb-2">Statistik:</p>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                  <div>
+                    <p class="text-gray-400">Total Pemain:</p>
+                    <p class="font-bold text-white" id="storage-total-players">0</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-400">Ukuran Data:</p>
+                    <p class="font-bold text-white" id="storage-size">0 bytes</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="flex flex-wrap gap-2">
+                <button onclick="exportStorageData()"
+                  class="px-4 py-2 bg-green-500/20 border border-green-500/50 rounded-lg hover:bg-green-500/30 transition-colors text-sm">
+                  📥 Export Data
+                </button>
+                <button onclick="document.getElementById('import-file-input').click()"
+                  class="px-4 py-2 bg-blue-500/20 border border-blue-500/50 rounded-lg hover:bg-blue-500/30 transition-colors text-sm">
+                  📤 Import Data
+                </button>
+                <button onclick="clearStorageData()"
+                  class="px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-lg hover:bg-red-500/30 transition-colors text-sm">
+                  🗑️ Clear Data
+                </button>
+                <button onclick="updateStorageStats()"
+                  class="px-4 py-2 bg-purple-500/20 border border-purple-500/50 rounded-lg hover:bg-purple-500/30 transition-colors text-sm">
+                  🔄 Refresh Stats
+                </button>
+              </div>
+
+              <input type="file" id="import-file-input" accept=".json" style="display: none;"
+                onchange="importStorageData(this)">
+
+              <div class="text-xs text-gray-400 bg-black/20 rounded p-3">
+                <p class="font-semibold mb-1">💡 Tips:</p>
+                <ul class="list-disc list-inside space-y-1">
+                  <li>Data tersimpan secara otomatis di browser</li>
+                  <li>Export data untuk backup atau pindah perangkat</li>
+
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Thank You -->
+          <div
+            class="mt-6 text-center bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-xl p-6 border border-purple-500/20">
+            <p class="text-lg md:text-xl font-semibold text-purple-300 mb-2">💜 Terima Kasih</p>
+            <p class="text-sm md:text-base text-gray-300">Media ini dibuat dengan penuh cinta dan diharapkan dapat
+              bermanfaat untuk pembelajaran matematika yang lebih menyenangkan dan bermakna!</p>
+          </div>
+        </div>
+      </section><!-- Game Screen -->
+      <section id="game-section" class="hidden">
+        <div class="card-glass rounded-2xl p-6 md:p-8"><!-- Game header -->
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4"><button onclick="exitGame()"
+                class="px-4 py-2 bg-red-500/20 border border-red-500/50 rounded-lg hover:bg-red-500/30 transition-colors">
+                X Keluar </button>
+              <div>
+                <p class="text-sm text-gray-400">Level <span id="current-level-display">1</span></p>
+                <p class="text-xl font-bold" id="level-title">Perpangkatan Dasar</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-4">
+              <div class="text-center">
+                <p class="text-sm text-gray-400">Waktu</p>
+                <p class="text-2xl font-bold" id="timer-display">5:00</p>
+              </div>
+              <div class="text-center">
+                <p class="text-sm text-gray-400">Skor</p>
+                <p class="text-2xl font-bold text-yellow-400" id="game-score">0</p>
+              </div>
+            </div>
+          </div><!-- Progress -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <p class="text-sm text-gray-400">Soal <span id="current-question-num">1</span> dari 10</p>
+              <p class="text-sm text-gray-400">Benar: <span id="correct-count" class="text-green-400 font-bold">0</span>
+                | Salah: <span id="wrong-count" class="text-red-400 font-bold">0</span></p>
+            </div>
+            <div class="h-3 bg-black/30 rounded-full overflow-hidden">
+              <div id="question-progress" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 progress-bar"
+                style="width: 10%"></div>
+            </div>
+          </div><!-- Question -->
+          <div id="question-container" class="space-y-6"><!-- Orientation -->
+            <div class="bg-gradient-to-r from-blue-500/20 to-cyan-500/20 rounded-xl p-6 border border-blue-500/30">
+              <h4 class="font-bold text-lg mb-3 flex items-center gap-2 text-cyan-300"><span>📋</span> Orientasi Masalah
+              </h4>
+              <p class="text-base md:text-lg text-gray-200" id="orientation-text">Pahami konteks masalah ini dengan
+                baik.</p>
+            </div><!-- Question Text -->
+            <div
+              class="bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl p-6 md:p-8 border border-indigo-500/30">
+              <p class="text-xl md:text-2xl font-bold mb-4 text-center" id="question-text">Memuat soal...</p>
+            </div><!-- Hint Section -->
+            <div
+              class="bg-gradient-to-r from-yellow-500/20 to-orange-500/20 rounded-xl p-6 border border-yellow-500/30">
+              <button onclick="toggleHint()" id="hint-button"
+                class="w-full flex items-center justify-between font-bold text-lg text-yellow-300 mb-3"> <span>💡 Lihat
+                  Hint</span> <span>▼</span> </button>
+              <div id="hint-section" class="hidden">
+                <p class="text-base md:text-lg text-gray-200" id="hint-text">Kerjakan soal sesuai dengan materi yang
+                  telah dipelajari.</p>
+              </div>
+            </div><!-- Hypothesis Section -->
+            <div class="bg-gradient-to-r from-green-500/20 to-emerald-500/20 rounded-xl p-6 border border-green-500/30">
+              <h4 class="font-bold text-lg mb-3 flex items-center gap-2 text-green-300"><span>💭</span> Rumuskan
+                Hipotesis Jawabanmu</h4>
+              <p class="text-sm md:text-base text-gray-300 mb-3">Sebelum memilih jawaban, tuliskan dugaan dan alasan
+                kamu di bawah ini:</p><textarea id="hypothesis-input"
+                placeholder="Contoh: Saya menduga jawabannya adalah... karena..."
+                class="w-full bg-black/30 border border-white/20 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-green-500 min-h-[100px] mb-3"></textarea>
+              <button id="save-hypothesis-btn" onclick="saveHypothesis()"
+                class="w-full bg-gradient-to-r from-green-500 to-emerald-500 px-6 py-3 rounded-lg font-bold hover:opacity-90 transition-opacity">
+                ✓ Simpan Hipotesis &amp; Lanjutkan </button>
+            </div><!-- Options Section (Hidden until hypothesis saved) -->
+            <div id="options-section"
+              class="hidden bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl p-6 border border-purple-500/30">
+              <h4 class="font-bold text-lg mb-4 flex items-center gap-2 text-purple-300"><span>🎯</span> Pilih Jawaban
+              </h4>
+              <div id="options-container" class="space-y-3"><!-- Options rendered here -->
+              </div>
+            </div>
+          </div><!-- Feedback -->
+          <div id="feedback-container" class="hidden rounded-xl p-6 mb-6">
+            <p class="text-xl font-bold mb-2" id="feedback-title"></p>
+            <p class="text-gray-300" id="feedback-text"></p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <audio id="click-sound" src="assets/sound/klik.mp3" preload="auto"></audio>
+  <audio id="question-bgm" src="assets/sound/backsong_soal.m4a" preload="auto" loop></audio>
+  <script>
+    // ==================== Configuration ====================
+    const defaultConfig = {
+      app_title: 'XnRoot',
+      welcome_title: 'Selamat Datang di XnRoot!',
+      welcome_description: 'Petualangan matematika interaktif dengan pendekatan inkuiri. Pelajari perpangkatan dan bentuk akar sambil bermain!'
+    };
+
+    // ==================== UI Sounds ====================
+    const clickSound = document.getElementById('click-sound');
+    const questionBgm = document.getElementById('question-bgm');
+
+    function playClickSound() {
+      if (!clickSound) {
+        return;
+      }
+      try {
+        clickSound.currentTime = 0;
+        const playPromise = clickSound.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => { });
+        }
+      } catch (error) {
+        // Ignore autoplay or playback errors
+      }
+    }
+
+    document.addEventListener('click', (event) => {
+      const button = event.target.closest('button');
+      if (!button || button.disabled) {
+        return;
+      }
+      playClickSound();
+    });
+
+    function playQuestionBgm() {
+      if (!questionBgm) {
+        return;
+      }
+      try {
+        if (!questionBgm.paused) {
+          return;
+        }
+        const playPromise = questionBgm.play();
+        if (playPromise && typeof playPromise.catch === 'function') {
+          playPromise.catch(() => { });
+        }
+      } catch (error) {
+        // Ignore autoplay or playback errors
+      }
+    }
+
+    function stopQuestionBgm() {
+      if (!questionBgm) {
+        return;
+      }
+      questionBgm.pause();
+      questionBgm.currentTime = 0;
+    }
+
+    // ==================== Badge Definitions ====================
+    const badgeDefinitions = {
+      explorer: { icon: '🗺️', name: 'Explorer', description: 'Mendaftar dan memulai petualangan', gradient: 'from-blue-500 to-cyan-500' },
+      video_watcher: { icon: '📺', name: 'Video Watcher', description: 'Menonton video pembelajaran', gradient: 'from-red-500 to-pink-500' },
+      material_reader: { icon: '📚', name: 'Material Reader', description: 'Membaca semua materi pembelajaran', gradient: 'from-indigo-500 to-purple-500' },
+      experimenter: { icon: '🧪', name: 'Experimenter', description: 'Bereksperimen dengan kalkulator', gradient: 'from-green-500 to-emerald-500' },
+      learner: { icon: '🎓', name: 'Learner', description: 'Menyelesaikan Level 1', gradient: 'from-green-500 to-teal-500' },
+      thinker: { icon: '🧠', name: 'Thinker', description: 'Menyelesaikan Level 2', gradient: 'from-yellow-500 to-orange-500' },
+      master: { icon: '👑', name: 'Master', description: 'Menyelesaikan Level 3', gradient: 'from-purple-500 to-pink-500' },
+      perfectionist: { icon: '💯', name: 'Perfectionist', description: 'Mendapat skor sempurna 1000', gradient: 'from-yellow-400 to-yellow-600' },
+      champion: { icon: '🏆', name: 'Champion', description: 'Mendapat skor minimal 900', gradient: 'from-red-500 to-rose-500' },
+      speedster: { icon: '⚡', name: 'Speedster', description: 'Menyelesaikan level cepat dan skor tinggi', gradient: 'from-cyan-400 to-blue-500' },
+      comeback_kid: { icon: '🔄', name: 'Comeback Kid', description: 'Mengulang level dan meningkatkan skor', gradient: 'from-orange-500 to-red-500' },
+      three_star: { icon: '⭐', name: 'Three Star', description: 'Menyelesaikan semua 3 level', gradient: 'from-yellow-500 to-amber-500' },
+      perfect_trilogy: { icon: '🎯', name: 'Perfect Trilogy', description: 'Mendapat skor >= 800 di semua level', gradient: 'from-purple-600 to-pink-600' },
+      inquiry_master: { icon: '🔬', name: 'Inquiry Master', description: 'Membaca semua fase inkuiri', gradient: 'from-teal-500 to-cyan-500' },
+      persistent: { icon: '💪', name: 'Persistent', description: 'Menjawab 50 soal', gradient: 'from-gray-600 to-gray-800' },
+      accurate: { icon: '🎯', name: 'Accurate', description: 'Menjawab 10 soal berturut-turut benar', gradient: 'from-lime-500 to-green-500' },
+      scholar: { icon: '📖', name: 'Scholar', description: 'Membaca CP/TP', gradient: 'from-indigo-600 to-blue-600' }
+    };
+
+    // ==================== Learning Materials ====================
+    const videos = {
+      dasar: `
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="bg-black/30 rounded-xl overflow-hidden cursor-pointer" onclick="trackVideoWatch()">
+            <div class="video-container"><iframe src="https://www.youtube.com/embed/EOR0-MBaIz4"
+                title="Bilangan Berpangkat | Matematika SMP" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+            <div class="p-4">
+              <h5 class="font-bold text-xl md:text-2xl text-indigo-300">Konsep Perpangkatan</h5>
+              <p class="text-base md:text-lg text-gray-400 mt-1">Konsep dasar bilangan berpangkat untuk SMP</p>
+            </div>
+          </div>
+          <div class="bg-black/30 rounded-xl overflow-hidden cursor-pointer" onclick="trackVideoWatch()">
+            <div class="video-container"><iframe src="https://www.youtube.com/embed/X48F-IM_GF8"
+                title="Bentuk Akar (1) - Bentuk Kuadrat dan Cara Menyederhanakan Akar - Matematika SMP" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+            <div class="p-4">
+              <h5 class="font-bold text-xl md:text-2xl text-green-300">Bentuk Akar</h5>
+              <p class="text-base md:text-lg text-gray-400 mt-1">Bentuk akar dan cara menyederhanakannya</p>
+            </div>
+          </div>
+        </div>
+      `,
+      nol: `
+        <div class="grid grid-cols-1 gap-6">
+          <div class="bg-black/30 rounded-xl overflow-hidden cursor-pointer" onclick="trackVideoWatch()">
+            <div class="video-container"><iframe src="https://www.youtube.com/embed/IPejnJDcQdM"
+                title="Perpangkatan dan Bentuk Akar [Part 4] - Pangkat 0 & Negatif" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+            <div class="p-4">
+              <h5 class="font-bold text-xl md:text-2xl text-purple-300">Pangkat Nol & Negatif</h5>
+              <p class="text-base md:text-lg text-gray-400 mt-1">Pangkat 0 dan negatif untuk SMP</p>
+            </div>
+          </div>
+        </div>
+      `,
+      pecahan: `
+        <div class="grid grid-cols-1 gap-6">
+          <div class="bg-black/30 rounded-xl overflow-hidden cursor-pointer" onclick="trackVideoWatch()">
+            <div class="video-container"><iframe src="https://www.youtube.com/embed/kXC2TR2Cwhg"
+                title="PANGKAT PECAHAN DAN BENTUK AKAR" frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen></iframe>
+            </div>
+            <div class="p-4">
+              <h5 class="font-bold text-xl md:text-2xl text-emerald-300">Pangkat Pecahan & Bentuk Akar</h5>
+              <p class="text-base md:text-lg text-gray-400 mt-1">Pangkat pecahan dan bentuk akar untuk SMP</p>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    const materials = {
+      dasar: `
+        <h4 class="text-2xl md:text-3xl font-bold mb-6 text-green-300">📚 Perpangkatan Dasar</h4>
+        <div class="space-y-5 text-gray-300">
+          
+          <!-- Fase 1: Orientasi Masalah -->
+          <div class="bg-blue-500/10 p-5 rounded-lg border border-blue-500/30">
+            <p class="font-bold text-lg text-cyan-300 mb-3 flex items-center gap-2">
+              <span>1️⃣</span> Orientasi Masalah
+            </p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <p class="text-base md:text-lg font-semibold text-cyan-200 mb-2">📱 Kasus: Viral di Media Sosial</p>
+              <p class="text-base md:text-lg mb-2">Kamu membuat video lucu dan membagikannya ke 3 teman. Setiap temanmu juga membagikannya ke 3 teman mereka masing-masing.</p>
+              <p class="text-base md:text-lg mb-2">• Putaran 1: 3 orang menonton</p>
+              <p class="text-base md:text-lg mb-2">• Putaran 2: 3 × 3 = 9 orang menonton</p>
+              <p class="text-base md:text-lg">• Putaran 3: 9 × 3 = 27 orang menonton</p>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-yellow-300">❓ Berapa orang yang menonton setelah 5 putaran? Bagaimana cara menghitungnya dengan efisien?</p>
+            <p class="text-sm md:text-base text-gray-400 mt-2 italic">💭 Pikirkan: Apakah ada pola matematika di sini?</p>
+          </div>
+          
+          <!-- Fase 2: Merumuskan Hipotesis -->
+          <div class="bg-green-500/10 p-5 rounded-lg border border-green-500/30">
+            <p class="font-bold text-lg text-green-300 mb-3 flex items-center gap-2">
+              <span>2️⃣</span> Merumuskan Hipotesis
+            </p>
+            <p class="text-base md:text-lg mb-3">🔍 Mari amati pola penyebarannya:</p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <ul class="space-y-2 text-base md:text-lg">
+                <li>• Putaran 1: 3 = 3¹</li>
+                <li>• Putaran 2: 3 × 3 = 3²</li>
+                <li>• Putaran 3: 3 × 3 × 3 = 3³</li>
+                <li>• Putaran 4: 3 × 3 × 3 × 3 = 3⁴</li>
+              </ul>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-green-300 mb-2">💡 Hipotesis:</p>
+            <p class="text-base md:text-lg">"Jumlah penonton pada putaran ke-n adalah 3<sup>n</sup>, artinya 3 dikalikan dengan dirinya sendiri sebanyak n kali. Ini disebut <strong>perpangkatan</strong>!"</p>
+          </div>
+          
+          <!-- Fase 3: Mengumpulkan Data -->
+          <div class="bg-yellow-500/10 p-5 rounded-lg border border-yellow-500/30">
+            <p class="font-bold text-lg text-yellow-300 mb-3 flex items-center gap-2">
+              <span>3️⃣</span> Mengumpulkan Data
+            </p>
+            <p class="text-base md:text-lg mb-3">🔬 <strong>Eksperimen:</strong> Gunakan kalkulator eksplorasi di bawah untuk menguji hipotesis!</p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <p class="text-base md:text-lg mb-2"><strong>Coba hitung:</strong></p>
+              <ul class="list-disc list-inside space-y-1 ml-4 text-base md:text-lg">
+                <li>3⁵ (untuk 5 putaran) = ?</li>
+                <li>2⁴ (jika membagikan ke 2 orang, 4 putaran) = ?</li>
+                <li>5³ (jika membagikan ke 5 orang, 3 putaran) = ?</li>
+              </ul>
+            </div>
+            <p class="text-base md:text-lg italic text-gray-400">💡 Tip: Bandingkan hasil eksperimen dengan hipotesismu!</p>
+          </div>
+          
+          <!-- Fase 4: Menguji Hipotesis -->
+          <div class="bg-purple-500/10 p-5 rounded-lg border border-purple-500/30">
+            <p class="font-bold text-lg text-purple-300 mb-3 flex items-center gap-2">
+              <span>4️⃣</span> Menguji Hipotesis
+            </p>
+            <p class="text-base md:text-lg mb-3">✓ <strong>Hasil Pengujian:</strong></p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <p class="text-base md:text-lg mb-2">Untuk video viral (basis 3):</p>
+              <ul class="space-y-2 ml-4 text-base md:text-lg">
+                <li>✓ 3⁵ = 243 penonton ✓</li>
+                <li>✓ 3⁶ = 729 penonton ✓</li>
+                <li>✓ 3⁷ = 2,187 penonton ✓</li>
+              </ul>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-purple-300">✅ Hipotesis terbukti benar! Pola perpangkatan berlaku untuk pertumbuhan viral!</p>
+          </div>
+          
+          <!-- Fase 5: Kesimpulan -->
+          <div class="bg-red-500/10 p-5 rounded-lg border border-red-500/30">
+            <p class="font-bold text-lg text-red-300 mb-3 flex items-center gap-2">
+              <span>5️⃣</span> Merumuskan Kesimpulan
+            </p>
+            <div class="bg-black/30 p-4 rounded-lg mb-4">
+              <p class="font-bold mb-2 text-lg">📖 Definisi Perpangkatan:</p>
+              <p class="text-lg md:text-xl mb-2">a<sup>n</sup> = a × a × a × ... × a (sebanyak n kali)</p>
+              <p class="text-base md:text-lg text-gray-300">• a = <strong>basis</strong> (bilangan yang dikalikan berulang)</p>
+              <p class="text-base md:text-lg text-gray-300">• n = <strong>pangkat/eksponen</strong> (banyaknya perkalian)</p>
+            </div>
+            <div class="bg-black/30 p-4 rounded-lg">
+              <p class="text-base md:text-lg font-bold mb-3">🌟 Aplikasi Nyata Perpangkatan:</p>
+              <ul class="space-y-3 text-base md:text-lg">
+                <li><strong>📱 Media Sosial:</strong> Konten viral menyebar secara eksponensial (3<sup>n</sup>, 2<sup>n</sup>)</li>
+                <li><strong>💰 Investasi:</strong> Bunga majemuk di bank: Modal × (1.05)<sup>tahun</sup></li>
+                <li><strong>💾 Kapasitas Data:</strong> 2GB, 4GB, 8GB, 16GB = 2¹, 2², 2³, 2⁴</li>
+                <li><strong>🦠 Pertumbuhan Bakteri:</strong> Pembelahan sel: 2<sup>n</sup> sel</li>
+                <li><strong>📈 Pertumbuhan Ekonomi:</strong> Populasi, GDP meningkat eksponensial</li>
+                <li><strong>🎮 Skor Game:</strong> Combo multiplier: skor × 2<sup>combo</sup></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `,
+      nol: `
+        <h4 class="text-2xl md:text-3xl font-bold mb-6 text-yellow-300">? Pangkat Nol dan Negatif</h4>
+        <div class="space-y-5 text-gray-300">
+          
+          <!-- Fase 1: Orientasi Masalah -->
+          <div class="bg-blue-500/10 p-5 rounded-lg border border-blue-500/30">
+            <p class="font-bold text-lg text-cyan-300 mb-3 flex items-center gap-2">
+              <span>1️⃣</span> Orientasi Masalah
+            </p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <p class="text-base md:text-lg font-semibold text-cyan-200 mb-2">🔋 Kasus: Pembagian Baterai HP</p>
+              <p class="text-base md:text-lg mb-2">Baterai HP kamu penuh 100%. Setiap jam, daya berkurang menjadi setengahnya karena main game:</p>
+              <p class="text-base md:text-lg mb-2">• Jam ke-3: 100% ÷ 2³ = 100% ÷ 8 = 12.5%</p>
+              <p class="text-base md:text-lg mb-2">• Jam ke-2: 100% ÷ 2² = 100% ÷ 4 = 25%</p>
+              <p class="text-base md:text-lg">• Jam ke-1: 100% ÷ 2¹ = 100% ÷ 2 = 50%</p>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-yellow-300">❓ Berapa persen baterai di jam ke-0 (saat penuh)? Bagaimana dengan 1 jam SEBELUM diisi (jam ke -1)?</p>
+            <p class="text-sm md:text-base text-gray-400 mt-2 italic">💭 Pikirkan: Apa arti 2⁰ dan 2⁻¹?</p>
+          </div>
+          
+          <!-- Fase 2: Merumuskan Hipotesis -->
+          <div class="bg-green-500/10 p-5 rounded-lg border border-green-500/30">
+            <p class="font-bold text-lg text-green-300 mb-3 flex items-center gap-2">
+              <span>2️⃣</span> Merumuskan Hipotesis
+            </p>
+            <p class="text-base md:text-lg mb-3">🔍 Mari amati pola penurunan daya baterai:</p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <ul class="space-y-2 text-base md:text-lg">
+                <li>• 2³ = 8 (jam ke-3)</li>
+                <li>• 2² = 4 (jam ke-2, dibagi 2)</li>
+                <li>• 2¹ = 2 (jam ke-1, dibagi 2 lagi)</li>
+                <li>• × = ? (jam ke-0, mungkin dibagi 2 lagi = 1?)</li>
+                <li>• 2⁻¹ = ? (1 jam sebelum isi, mungkin 1/2?)</li>
+              </ul>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-green-300 mb-2">💡 Hipotesis:</p>
+            <p class="text-base md:text-lg">"Setiap pangkat turun 1, hasilnya dibagi basis. Maka × = 1dan 2⁻¹ = 1/2!"</p>
+          </div>
+          
+          <!-- Fase 3: Mengumpulkan Data -->
+          <div class="bg-yellow-500/10 p-5 rounded-lg border border-yellow-500/30">
+            <p class="font-bold text-lg text-yellow-300 mb-3 flex items-center gap-2">
+              <span>3🔬</span> Mengumpulkan Data
+            </p>
+            <p class="text-base md:text-lg mb-3">🧪 <strong>Eksperimen:</strong> Coba dengan basis berbeda di kalkulator eksplorasi!</p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <p class="text-base md:text-lg mb-2"><strong>Test Pangkat Nol:</strong></p>
+              <ul class="list-disc list-inside space-y-1 ml-4 text-base md:text-lg">
+                <li>3⁰ = ?</li>
+                <li>5⁰ = ?</li>
+                <li>10⁰ = ?</li>
+              </ul>
+              <p class="text-base md:text-lg mb-2 mt-3"><strong>Test Pangkat Negatif:</strong></p>
+              <ul class="list-disc list-inside space-y-1 ml-4 text-base md:text-lg">
+                <li>2⁻¹ = ? (setengah dari 2⁰)</li>
+                <li>2⁻² = ? (setengah dari 2⁻¹)</li>
+                <li>3⁻¹ = ?</li>
+              </ul>
+            </div>
+          </div>
+          
+          <!-- Fase 4: Menguji Hipotesis -->
+          <div class="bg-purple-500/10 p-5 rounded-lg border border-purple-500/30">
+            <p class="font-bold text-lg text-purple-300 mb-3 flex items-center gap-2">
+              <span>4✅</span> Menguji Hipotesis
+            </p>
+            <p class="text-base md:text-lg mb-3">📊 <strong>Hasil Pengujian:</strong></p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <p class="text-base md:text-lg mb-2"><strong>Pangkat Nol:</strong></p>
+              <ul class="space-y-2 ml-4">
+                <li>✓ 2⁰ = 1 (100% baterai = 1 × 100%) ✅</li>
+                <li>✓ 3⁰ = 1</li>
+                <li>✓ 10⁰ = 1</li>
+                <li>✓ <strong>Semua bilangan pangkat 0 = 1!</strong></li>
+              </ul>
+            </div>
+            <div class="bg-black/20 p-4 rounded-lg">
+              <p class="text-base md:text-lg mb-2"><strong>Pangkat Negatif:</strong></p>
+              <ul class="space-y-2 ml-4">
+                <li>✓ 2⁻¹ = 1/2 = 0.5 ✅</li>
+                <li>✓ × = 1/4 = 0.25 ✅</li>
+                <li>✓ 2⁻³ = 1/8 = 0.125 ✅</li>
+              </ul>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-purple-300 mt-3">✅ Hipotesis terbukti benar!</p>
+          </div>
+          
+          <!-- Fase 5: Kesimpulan -->
+          <div class="bg-red-500/10 p-5 rounded-lg border border-red-500/30">
+            <p class="font-bold text-lg text-red-300 mb-3 flex items-center gap-2">
+              <span>5📋</span> Merumuskan Kesimpulan
+            </p>
+            <div class="bg-black/30 p-4 rounded-lg mb-3">
+              <p class="font-bold mb-2">📝 Kesimpulan Pangkat Nol:</p>
+              <p class="text-lg md:text-xl mb-2">a<sup>0</sup> = 1(untuk a ? 0)</p>
+              <p class="text-base text-gray-300">Bilangan apapun pangkat 0 = 1</p>
+            </div>
+            <div class="bg-black/30 p-4 rounded-lg mb-4">
+              <p class="font-bold mb-2">📝 Kesimpulan Pangkat Negatif:</p>
+              <p class="text-lg md:text-xl mb-2">a<sup>-n</sup> = 1/a<sup>n</sup></p>
+              <p class="text-base text-gray-300">Pangkat negatif = kebalikan dari pangkat positif</p>
+            </div>
+            <div class="bg-black/30 p-4 rounded-lg">
+              <p class="text-base md:text-lg font-bold mb-3">🌍 Aplikasi Nyata:</p>
+              <ul class="space-y-3 text-base md:text-lg">
+                <li><strong>🔬 Sains:</strong> Ukuran mikroskopis: 10⁻⁶ m = 1 mikrometer (bakteri)</li>
+                <li><strong>⚡ Fisika:</strong> Konduktansi listrik (Ω⁻¹), percepatan (m/s² = m·s⁻²)</li>
+                <li><strong>💊 Medis:</strong> Dosis obat: 10⁻³ g = 1 miligram</li>
+                <li><strong>💻 Teknologi:</strong> Ukuran chip: 5 nanometer = 5×10⁻⁹ meter</li>
+                <li><strong>💰 Ekonomi:</strong> Inflasi negatif (deflasi), pertumbuhan negatif</li>
+                <li><strong>🌡️ Suhu:</strong> Skala logaritmik untuk pH, desibel (dB)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `,
+      pecahan: `
+        <h4 class="text-2xl md:text-3xl font-bold mb-6 text-purple-300">📐 Pangkat Pecahan dan Bentuk Akar</h4>
+        <div class="space-y-5 text-gray-300">
+          
+          <!-- Fase 1: Orientasi Masalah -->
+          <div class="bg-blue-500/10 p-5 rounded-lg border border-blue-500/30">
+            <p class="font-bold text-lg text-cyan-300 mb-3 flex items-center gap-2">
+              <span>1🎯</span> Orientasi Masalah
+            </p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <p class="text-base md:text-lg font-semibold text-cyan-200 mb-2">📦 Kasus: Menghitung Sisi Kotak</p>
+              <p class="text-base md:text-lg mb-2">Kamu punya kotak kubik dengan volume 27 liter. Berapa panjang sisi kotak tersebut?</p>
+              <p class="text-base md:text-lg mb-2">📦 Volume kubus = sisi³</p>
+              <p class="text-base md:text-lg">📌 Jadi: sisi³ = 27</p>
+              <p class="text-base md:text-lg mt-2">Kita tahu sisi = ³√27 = 3 (karena 3³ = 27)</p>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-yellow-300">❓ Bagaimana dengan 27^(1/3)? Apakah sama dengan ³√27? Apa hubungan pangkat pecahan dengan akar?</p>
+            <p class="text-sm md:text-base text-gray-400 mt-2 italic">💡 Pikirkan: Mungkinkah ada pola matematika di sini?</p>
+          </div>
+          
+          <!-- Fase 2: Merumuskan Hipotesis -->
+          <div class="bg-green-500/10 p-5 rounded-lg border border-green-500/30">
+            <p class="font-bold text-lg text-green-300 mb-3 flex items-center gap-2">
+              <span>2💡</span> Merumuskan Hipotesis
+            </p>
+            <p class="text-base md:text-lg mb-3">💭 Mari berpikir tentang hubungannya:</p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <ul class="space-y-2 text-base md:text-lg">
+                <li>📌 ³√27 adalah bilangan yang jika dipangkatkan 3 = 27</li>
+                <li>📌 Jika 27^(1/3) × 27^(1/3) × 27^(1/3) = 27^(1/3 + 1/3 + 1/3) = 27¹ = 27</li>
+                <li>📌 Berarti 27^(1/3) adalah bilangan yang dipangkatkan 3 = 27</li>
+              </ul>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-green-300 mb-2">🎯 Hipotesis:</p>
+            <p class="text-base md:text-lg">"Mungkin a^(1/n) = <sup>n</sup>va ! Pangkat pecahan 1/n sama dengan akar pangkat n!"</p>
+          </div>
+          
+          <!-- Fase 3: Mengumpulkan Data -->
+          <div class="bg-yellow-500/10 p-5 rounded-lg border border-yellow-500/30">
+            <p class="font-bold text-lg text-yellow-300 mb-3 flex items-center gap-2">
+              <span>3🔬</span> Mengumpulkan Data
+            </p>
+            <p class="text-base md:text-lg mb-3">🧪 <strong>Eksperimen:</strong> Coba dengan kalkulator eksplorasi!</p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <p class="text-base md:text-lg mb-2"><strong>Coba hitung:</strong></p>
+              <ul class="list-disc list-inside space-y-1 ml-4 text-base md:text-lg">
+                <li>16^(1/2) = ? (bandingkan dengan √16)</li>
+                <li>16^(1/4) = ? (bandingkan dengan ⁴√16)</li>
+                <li>8^(1/3) = ? (bandingkan dengan ³√8)</li>
+                <li>4^(3/2) = ? (coba √(4³) atau (√4)³)</li>
+              </ul>
+            </div>
+            <p class="text-base md:text-lg italic text-gray-400">💡 Tip: Perhatikan apakah hasilnya sama dengan operasi akar!</p>
+          </div>
+          
+          <!-- Fase 4: Menguji Hipotesis -->
+          <div class="bg-purple-500/10 p-5 rounded-lg border border-purple-500/30">
+            <p class="font-bold text-lg text-purple-300 mb-3 flex items-center gap-2">
+              <span>4✅</span> Menguji Hipotesis
+            </p>
+            <p class="text-base md:text-lg mb-3">📊 <strong>Hasil Pengujian:</strong></p>
+            <div class="bg-black/20 p-4 rounded-lg mb-3">
+              <ul class="space-y-2 ml-4 text-base md:text-lg">
+                <li>✓ 16^(1/2) = 4 = √16 ✅</li>
+                <li>✓ 16^(1/4) = 2 = ⁴√16 ✅</li>
+                <li>✓ 8^(1/3) = 2 = ³√8 ✅</li>
+                <li>✓ 4^(3/2) = (√4)³ = 2³ = 8 ✅</li>
+              </ul>
+            </div>
+            <p class="text-base md:text-lg font-semibold text-purple-300">✅ Hipotesis terbukti! Ada hubungan pasti antara pangkat pecahan dan akar!</p>
+          </div>
+          
+          <!-- Fase 5: Kesimpulan -->
+          <div class="bg-red-500/10 p-5 rounded-lg border border-red-500/30">
+            <p class="font-bold text-lg text-red-300 mb-3 flex items-center gap-2">
+              <span>5📋</span> Merumuskan Kesimpulan
+            </p>
+            <div class="bg-black/30 p-4 rounded-lg mb-3">
+              <p class="font-bold mb-2">📝 Kesimpulan 1:</p>
+              <p class="text-lg md:text-xl mb-2">a<sup>1/n</sup> = <sup>n</sup>va</p>
+              <p class="text-base text-gray-300">Pangkat 1/n sama dengan akar pangkat n</p>
+            </div>
+            <div class="bg-black/30 p-4 rounded-lg mb-4">
+              <p class="font-bold mb-2">📝 Kesimpulan 2:</p>
+              <p class="text-lg md:text-xl mb-2">a<sup>m/n</sup> = <sup>n</sup>v(a<sup>m</sup>) = (<sup>n</sup>va)<sup>m</sup></p>
+              <p class="text-base text-gray-300">Untuk pangkat pecahan umum m/n</p>
+            </div>
+            <div class="bg-black/30 p-4 rounded-lg">
+              <p class="text-base md:text-lg font-bold mb-3">🌍 Aplikasi Nyata:</p>
+              <ul class="space-y-3 text-base md:text-lg">
+                <li><strong>🏗️ Arsitektur:</strong> Menghitung dimensi ruangan dari volume/luas</li>
+                <li><strong>📐 Geometri:</strong> Diagonal persegi = sisi × √2</li>
+                <li><strong>🎵 Musik:</strong> Interval nada: 2^(1/12), 2^(2/12), dst.</li>
+                <li><strong>⚡ Fisika:</strong> Kecepatan gelombang = √(tegangan/massa)</li>
+                <li><strong>📊 Statistik:</strong> Standar deviasi = √(varians)</li>
+                <li><strong>💰 Keuangan:</strong> Rata-rata geometrik: (a×b)^(1/2)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      `
+    };
+
+    // ==================== Question Bank ====================
+    const questionBank = {
+      1: [
+        { q: "Sebuah koloni bakteri membelah diri setiap jam. Jika awalnya ada 3 bakteri, berapa jumlahnya setelah 4 jam?", options: ["12", "27", "48", "81"], correct: 3, explanation: "34 = 3 × 3 × 3 × 3 = 81 bakteri" },
+        { q: "Seorang atlet lari menggandakan jarak larinya setiap hari. Hari pertama 2 km. Berapa km di hari ke-5?", options: ["16", "32", "64", "128"], correct: 1, explanation: "2 × 24 = 2 × 16 = 32 km" },
+        { q: "Sebuah video viral dibagikan 5 orang, kemudian masing-masing membagikan ke 5 orang lagi. Total berapa orang setelah 2 putaran?", options: ["10", "25", "30", "125"], correct: 2, explanation: "5 + 5² = 5 + 25 = 30 orang (5 putaran pertama + 25 putaran kedua)" },
+        { q: "Harga tanah naik 2 kali lipat setiap 10 tahun. Jika sekarang 100 juta, berapa setelah 30 tahun?", options: ["400 juta", "600 juta", "800 juta", "1000 juta"], correct: 2, explanation: "100 × 2³ = 100 × 8 = 800 juta" },
+        { q: "Hitunglah: 4² + 3² = ?", options: ["25", "49", "144", "169"], correct: 0, explanation: "4² + 3² = 16 + 9 = 25" },
+        { q: "Sebuah kertas dilipat menjadi 2 bagian, lalu dilipat lagi, begitu seterusnya 6 kali. Berapa bagian?", options: ["32", "64", "128", "256"], correct: 1, explanation: "26 = 64 bagian" },
+        { q: "Luas persegi dengan sisi 7 cm adalah?", options: ["14 cm²", "28 cm²", "49 cm²", "56 cm²"], correct: 2, explanation: "7² = 49 cm²" },
+        { q: "Jika 2² × 2³ = 2n, maka n = ?", options: ["5", "6", "8", "12"], correct: 0, explanation: "2²×2³ = 25, jadi n = 5" },
+        { q: "Volume kubus dengan rusuk 3 cm adalah?", options: ["9 cm²", "18 cm²", "27 cm²", "81 cm²"], correct: 2, explanation: "3³ = 27 cm²" },
+        { q: "Populasi kota bertambah 2 kali lipat setiap 5 tahun. Jika sekarang 1000 orang, berapa setelah 15 tahun?", options: ["4000", "6000", "8000", "16000"], correct: 2, explanation: "1000 × 2³ = 1000 × 8 = 8000 orang" }
+      ],
+      2: [
+        { q: "Sederhanakan: 5⁰ + 3⁰ = ?", options: ["0", "1", "2", "8"], correct: 2, explanation: "5⁰ = 1, 3⁰ = 1, jadi 1 + 1 = 2" },
+        { q: "Nilai dari 2⁻³ adalah?", options: ["1/8", "1/6", "1/3", "1/2"], correct: 0, explanation: "2⁻³ = 1/2³ = 1/8" },
+        { q: "Dalam ilmu kimia, pH 7 berarti konsentrasi ion H⁺ = 10⁻⁷. Nilai ini sama dengan?", options: ["0.0000001", "0.000001", "0.00001", "0.0001"], correct: 0, explanation: "10⁻⁷ = 1/10,000,000 = 0.0000001" },
+        { q: "Hitunglah: (1/2)⁻¹ = ?", options: ["1/4", "1/2", "2", "4"], correct: 3, explanation: "(1/2)⁻¹ = 2¹ = 4" },
+        { q: "Sederhanakan: 10¹ × 10⁻² × 10² = ?", options: ["0", "10", "100", "1000"], correct: 1, explanation: "10¹⁻²⁺² = 10¹ = 10" },
+        { q: "Jika harga barang turun menjadi 1/2 setiap bulan, setelah 3 bulan harganya menjadi berapa kali harga awal?", options: ["1/8", "1/6", "1/3", "1/2"], correct: 0, explanation: "(1/2)³ = 1/8 kali harga awal" },
+        { q: "Massa virus COVID-19 sekitar 10⁻²¹ kg. Ini sama dengan berapa gram?", options: ["10⁻¹⁸", "10⁻²⁰", "10⁻²¹", "10⁻¹⁵"], correct: 0, explanation: "10⁻²¹ kg = 10⁻²¹ × 10³ g = 10⁻¹⁸ g" },
+        { q: "Hitunglah: 3⁻² + 3⁰ = ?", options: ["10/9", "1", "2/3", "1/9"], correct: 0, explanation: "3⁻² + 3⁰ = 1/9 + 1 = 1/9 + 9/9 = 10/9" },
+        { q: "Nilai dari (2⁻¹)⁻³ adalah?", options: ["1/8", "1/2", "2", "8"], correct: 3, explanation: "(2⁻¹)⁻³ = 2³ = 8" },
+        { q: "Jika x⁰ = 1, maka x bisa bernilai? (kecuali)", options: ["5", "100", "0", "-7"], correct: 2, explanation: "Semua bilangan pangkat 0 = 1, kecuali 0⁰ yang tidak terdefinisi" }
+      ],
+      3: [
+        { q: "Panjang diagonal persegi dengan sisi 4 cm mendekati? (√2 ≈ 1.41)", options: ["5.64 cm", "6.64 cm", "7.64 cm", "8.64 cm"], correct: 0, explanation: "diagonal = 4√2 ≈ 4 × 1.41 = 5.64 cm" },
+        { q: "Nilai dari 16^(1/4) adalah?", options: ["2", "4", "8", "16"], correct: 0, explanation: "16^(1/4) = ⁴√16 = 2" },
+        { q: "Sederhanakan: √50 = ?", options: ["5√2", "2√5", "10√2", "25√2"], correct: 0, explanation: "√50 = √(25×2) = 5√2" },
+        { q: "Jika tinggi pohon bertambah mengikuti pola √t meter (t = tahun), berapa tinggi setelah 16 tahun?", options: ["2 m", "4 m", "8 m", "16 m"], correct: 1, explanation: "√16 = 4 meter" },
+        { q: "Nilai dari 27^(2/3) adalah?", options: ["3", "6", "9", "18"], correct: 2, explanation: "27^(2/3) = (³√27)² = 3⁰ = 9" },
+        { q: "Sederhanakan: √12 + √27 = ?", options: ["3√3", "5√3", "6√3", "9√3"], correct: 1, explanation: "√12 + √27 = 2√3 + 3√3 = 5√3" },
+        { q: "Kecepatan suara dalam air ≈ √(K/ρ). Jika K=2.25×10⁹ dan ρ=10³, berapa kecepatan? (dalam 10³ m/s)", options: ["1.5", "2.25", "4.5", "5"], correct: 0, explanation: "v = √(2.25×10⁹/10³) = √(2.25×10⁶) = 1.5×10³ m/s" },
+        { q: "Nilai dari 8^(2/3) adalah?", options: ["2", "4", "8", "16"], correct: 1, explanation: "8^(2/3) = (³√8)² = 2² = 4" },
+        { q: "Jarak terdekat titik (3,4) ke titik asal adalah?", options: ["5", "7", "12", "25"], correct: 0, explanation: "d = √(3²+4²) = √(9+16) = √25 = 5" },
+        { q: "Sederhanakan: ³√64 = ?", options: ["2", "4", "8", "16"], correct: 1, explanation: "³√64 = 4 (karena 4³ = 64)" }
+      ]
+    };
+
+    // ==================== Global Variables ====================
+    // Storage Configuration - Offline Mode Only
+    const STORAGE_MODE = 'offline'; // Mode offline permanen
+
+    // Debug mode - set true untuk melihat detail log
+    window.DEBUG_MODE = false; // Set true jika perlu debug
+
+    // Helper function to get active storage service (offline only)
+    function getStorage() {
+      return window.offlineStorage;
+    }
+
+    let currentPlayer = null;
+    let allPlayers = [];
+    let currentLevel = 1;
+    let currentQuestionIndex = 0;
+    let levelScore = 0;
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let timeRemaining = 300;
+    let timerInterval = null;
+    let levelStartTime = null;
+    let currentQuestions = [];
+    let openPhases = [];
+
+    // ==================== Badge Functions ====================
+    function hasBadge(badgeName) {
+      if (!currentPlayer || !currentPlayer.badges) return false;
+      return currentPlayer.badges.split(',').filter(b => b).includes(badgeName);
+    }
+
+    function renderBadges() {
+      const container = document.getElementById('badges-container');
+      if (!container) return;
+
+      const earnedBadges = currentPlayer && currentPlayer.badges ? currentPlayer.badges.split(',').filter(b => b) : [];
+      const badgeCount = document.getElementById('badge-count');
+      if (badgeCount) badgeCount.textContent = `(${earnedBadges.length}/17)`;
+
+      container.innerHTML = Object.entries(badgeDefinitions).map(([key, badge]) => {
+        const isEarned = earnedBadges.includes(key);
+        return `
+          <div class="badge-item text-center ${isEarned ? '' : 'opacity-30'} transition-all cursor-pointer" 
+               onclick="showBadgeInfo('${key}')" 
+               title="${badge.description}">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-gradient-to-br ${badge.gradient} flex items-center justify-center text-2xl sm:text-3xl mx-auto mb-2 ${isEarned ? 'badge-glow' : ''}">
+              ${badge.icon}
+            </div>
+            <p class="text-xs font-semibold">${badge.name}</p>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showBadgeInfo(badgeKey) {
+      playClickSound();
+      const badge = badgeDefinitions[badgeKey];
+      const isEarned = hasBadge(badgeKey);
+      showToast(isEarned ? `🏅 ${badge.name}: ${badge.description}` : `🔒 ${badge.name}: ${badge.description}`, isEarned ? 'success' : 'info');
+    }
+
+    async function addBadge(badgeName) {
+      if (!currentPlayer || !getStorage() || !badgeDefinitions[badgeName]) return;
+      if (hasBadge(badgeName)) return;
+
+      const badges = currentPlayer.badges ? currentPlayer.badges.split(',').filter(b => b) : [];
+      badges.push(badgeName);
+      currentPlayer.badges = badges.join(',');
+
+      const result = await getStorage().update(currentPlayer);
+      if (!result.isOk) {
+        showToast('Gagal menyimpan badge', 'error');
+        return;
+      }
+
+      const badge = badgeDefinitions[badgeName];
+      document.getElementById('badge-icon-notif').textContent = badge.icon;
+      document.getElementById('badge-name-notif').textContent = badge.name;
+      document.getElementById('badge-desc-notif').textContent = badge.description;
+      document.getElementById('badge-notification').classList.remove('hidden');
+
+      renderBadges();
+      showToast(`🏅 Badge baru: ${badge.name}!`, 'success');
+    }
+
+    function closeBadgeNotification() {
+      document.getElementById('badge-notification').classList.add('hidden');
+    }
+
+    // ==================== Activity Tracking ====================
+    async function trackVideoWatch() {
+      if (!currentPlayer || !getStorage()) return;
+
+      currentPlayer.video_watched = (currentPlayer.video_watched || 0) + 1;
+      await getStorage().update(currentPlayer);
+
+      if (currentPlayer.video_watched >= 1 && !hasBadge('video_watcher')) {
+        await addBadge('video_watcher');
+      }
+    }
+
+    async function trackMaterialRead(materialKey) {
+      if (!currentPlayer || !getStorage()) return;
+
+      const readMaterials = currentPlayer.materials_read ? currentPlayer.materials_read.split(',').filter(m => m) : [];
+      if (!readMaterials.includes(materialKey)) {
+        readMaterials.push(materialKey);
+        currentPlayer.materials_read = readMaterials.join(',');
+        await getStorage().update(currentPlayer);
+
+        if (readMaterials.length >= 3 && !hasBadge('material_reader')) {
+          await addBadge('material_reader');
+        }
+      }
+    }
+
+    async function trackExperiment() {
+      if (!currentPlayer || !getStorage()) return;
+
+      currentPlayer.experiments_done = (currentPlayer.experiments_done || 0) + 1;
+      await getStorage().update(currentPlayer);
+
+      if (currentPlayer.experiments_done >= 5 && !hasBadge('experimenter')) {
+        await addBadge('experimenter');
+      }
+    }
+
+    async function checkBadgesAfterLevel(level, score, timeTaken) {
+      // Level completion badges
+      if (level === 1 && !hasBadge('learner')) await addBadge('learner');
+      if (level === 2 && !hasBadge('thinker')) await addBadge('thinker');
+      if (level === 3 && !hasBadge('master')) await addBadge('master');
+
+      // Score badges
+      if (score === 1000 && !hasBadge('perfectionist')) await addBadge('perfectionist');
+      if (score >= 900 && !hasBadge('champion')) await addBadge('champion');
+      if (score >= 800 && timeTaken < 180 && !hasBadge('speedster')) await addBadge('speedster');
+
+      // Check three star
+      const completedLevels = [
+        currentPlayer.level_1_completed,
+        currentPlayer.level_2_completed,
+        currentPlayer.level_3_completed
+      ].filter(Boolean).length;
+
+      if (completedLevels >= 3 && !hasBadge('three_star')) await addBadge('three_star');
+
+      // Check perfect trilogy
+      if (currentPlayer.level_1_score >= 800 &&
+        currentPlayer.level_2_score >= 800 &&
+        currentPlayer.level_3_score >= 800 &&
+        !hasBadge('perfect_trilogy')) {
+        await addBadge('perfect_trilogy');
+      }
+
+      // Persistent badge
+      if ((currentPlayer.total_questions || 0) >= 50 && !hasBadge('persistent')) {
+        await addBadge('persistent');
+      }
+
+      // Accurate badge
+      if ((currentPlayer.correct_streak || 0) >= 10 && !hasBadge('accurate')) {
+        await addBadge('accurate');
+      }
+
+      // Comeback kid badge (check if retrying a level)
+      const attempts = currentPlayer.level_attempts ? currentPlayer.level_attempts.split(',').filter(a => a) : [];
+      const levelAttempts = attempts.filter(a => a.startsWith(`level${level}`)).length;
+      if (levelAttempts > 1 && !hasBadge('comeback_kid')) {
+        await addBadge('comeback_kid');
+      }
+    }
+
+    // ==================== Material Functions ====================
+    function showMaterial(type) {
+      document.querySelectorAll('.material-tab').forEach(tab => {
+        tab.classList.remove('bg-purple-500');
+        tab.classList.add('bg-white/10');
+      });
+      document.querySelector(`.material-tab[data-tab="${type}"]`).classList.remove('bg-white/10');
+      document.querySelector(`.material-tab[data-tab="${type}"]`).classList.add('bg-purple-500');
+
+      document.getElementById('material-content').innerHTML = materials[type];
+      const videoContainer = document.getElementById('video-content');
+      if (videoContainer) {
+        videoContainer.innerHTML = videos[type] || '';
+      }
+
+      trackMaterialRead(type);
+    }
+
+    // ==================== Explorer Mode Functions ====================
+    function setExplorerMode(mode) {
+      // Update button styles
+      document.querySelectorAll('.explorer-mode-btn').forEach(btn => {
+        btn.classList.remove('bg-indigo-500', 'bg-yellow-500', 'bg-purple-500');
+        btn.classList.add('bg-white/10');
+      });
+
+      // Hide all explorer contents
+      document.querySelectorAll('.explorer-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+
+      // Show selected mode
+      if (mode === 'basic') {
+        document.getElementById('mode-basic').classList.remove('bg-white/10');
+        document.getElementById('mode-basic').classList.add('bg-indigo-500');
+        document.getElementById('explorer-basic').classList.remove('hidden');
+        calculateExponent();
+      } else if (mode === 'zero-negative') {
+        document.getElementById('mode-zero-negative').classList.remove('bg-white/10');
+        document.getElementById('mode-zero-negative').classList.add('bg-yellow-500');
+        document.getElementById('explorer-zero-negative').classList.remove('hidden');
+        calculateZeroNegative();
+      } else if (mode === 'fraction-root') {
+        document.getElementById('mode-fraction-root').classList.remove('bg-white/10');
+        document.getElementById('mode-fraction-root').classList.add('bg-purple-500');
+        document.getElementById('explorer-fraction-root').classList.remove('hidden');
+        calculateFractionRoot();
+      }
+    }
+
+    function calculateExponent() {
+      const base = parseFloat(document.getElementById('exp-base').value) || 2;
+      const power = parseFloat(document.getElementById('exp-power').value) || 1;
+
+      let result, explanation, calculation;
+
+      if (power === 0) {
+        result = 1;
+        calculation = `${base}2⁻² = 1`;
+        explanation = "Setiap bilangan (selain 0) pangkat 0 sama dengan 1";
+      } else if (power < 0) {
+        result = Math.pow(base, power);
+        calculation = `${base}^(${power}) = 1/${base}^${Math.abs(power)} = ${result.toFixed(4)}`;
+        explanation = `Pangkat negatif berarti 1 dibagi dengan bilangan tersebut pangkat positif`;
+      } else if (power % 1 !== 0) {
+        result = Math.pow(base, power);
+        calculation = `${base}^(${power}) × ${result.toFixed(4)}`;
+        explanation = `Pangkat pecahan berkaitan dengan akar bilangan`;
+      } else {
+        result = Math.pow(base, power);
+        const multiplication = Array(Math.min(power, 5)).fill(base).join(' × ') + (power > 5 ? '...' : '');
+        calculation = `${base}^${power} = ${multiplication} = ${result}`;
+        explanation = `Artinya: ${base} dikalikan dengan dirinya sendiri sebanyak ${power} kali`;
+      }
+
+      document.getElementById('exp-result').textContent = calculation;
+      document.getElementById('exp-explanation').textContent = explanation;
+
+      trackExperiment();
+    }
+
+    function calculateZeroNegative() {
+      const base = parseFloat(document.getElementById('zn-base').value) || 2;
+      const power = parseInt(document.getElementById('zn-power').value) || 0;
+
+      let result, calculation, explanation;
+
+      if (base === 0 && power <= 0) {
+        calculation = `0^${power} tidak terdefinisi`;
+        explanation = "0 pangkat 0 atau 0 pangkat negatif tidak terdefinisi dalam matematika";
+      } else if (power === 0) {
+        result = 1;
+        calculation = `${base}2⁻² = 1`;
+        explanation = `Setiap bilangan (selain 0) pangkat 0 = 1. Ini adalah aturan dasar perpangkatan!`;
+      } else if (power < 0) {
+        const positivePower = Math.abs(power);
+        const denominatorValue = Math.pow(base, positivePower);
+        result = 1 / denominatorValue;
+
+        if (Number.isInteger(denominatorValue) && denominatorValue < 1000) {
+          calculation = `${base}^(${power}) = 1/${base}^${positivePower} = 1/${denominatorValue}`;
+        } else {
+          calculation = `${base}^(${power}) = 1/${base}^${positivePower} × ${result.toFixed(6)}`;
+        }
+
+        if (result >= 0.0001) {
+          explanation = `Pangkat negatif = kebalikan dari pangkat positif. ${base}^(${power}) = 12⁻² ${base}^${positivePower}`;
+        } else {
+          explanation = `Nilai sangat kecil! Ini seperti ukuran mikroskopis (nano, mikro). Dalam notasi ilmiah: ${result.toExponential(2)}`;
+        }
+      } else {
+        result = Math.pow(base, power);
+        calculation = `${base}^${power} = ${result}`;
+        explanation = `Perpangkatan positif biasa: ${base} dikalikan ${power} kali`;
+      }
+
+      document.getElementById('zn-result').textContent = calculation;
+      document.getElementById('zn-explanation').textContent = explanation;
+
+      trackExperiment();
+    }
+
+    function calculateFractionRoot() {
+      const base = parseFloat(document.getElementById('fr-base').value) || 16;
+      const numerator = parseInt(document.getElementById('fr-numerator').value) || 1;
+      const denominator = parseInt(document.getElementById('fr-denominator').value) || 2;
+
+      if (denominator === 0) {
+        document.getElementById('fr-result').textContent = "Error: Penyebut tidak boleh 0";
+        document.getElementById('fr-explanation').textContent = "Pembagian dengan nol tidak terdefinisi";
+        return;
+      }
+
+      if (base < 0 && denominator % 2 === 0) {
+        document.getElementById('fr-result').textContent = "Error: Akar genap dari bilangan negatif";
+        document.getElementById('fr-explanation').textContent = "Dalam bilangan real, tidak bisa menghitung akar genap dari bilangan negatif";
+        return;
+      }
+
+      const fraction = numerator / denominator;
+      const result = Math.pow(base, fraction);
+
+      let calculation = '';
+      let explanation = '';
+
+      // Format the display
+      const fractionDisplay = numerator === 1 ? `1/${denominator}` : `${numerator}/${denominator}`;
+
+      if (numerator === 1) {
+        // Simple root case
+        const rootSymbol = denominator === 2 ? 'v' : `${getSuperscript(denominator)}v`;
+        calculation = `${base}^(1/${denominator}) = ${rootSymbol}${base} = ${result.toFixed(4)}`;
+
+        if (Number.isInteger(result)) {
+          calculation = `${base}^(1/${denominator}) = ${rootSymbol}${base} = ${Math.round(result)}`;
+          explanation = `${base} pangkat 1/${denominator} sama dengan akar pangkat ${denominator} dari ${base}`;
+        } else {
+          explanation = `${base} pangkat 1/${denominator} sama dengan akar pangkat ${denominator} dari ${base} (2⁻² ${result.toFixed(4)})`;
+        }
+      } else {
+        // Complex fraction case
+        const rootValue = Math.pow(base, 1 / denominator);
+        const finalResult = Math.pow(rootValue, numerator);
+
+        const rootSymbol = denominator === 2 ? 'v' : `${getSuperscript(denominator)}v`;
+
+        if (Number.isInteger(result)) {
+          calculation = `${base}^(${fractionDisplay}) = (${rootSymbol}${base})^${numerator} = ${Math.round(result)}`;
+        } else {
+          calculation = `${base}^(${fractionDisplay}) = (${rootSymbol}${base})^${numerator} × ${result.toFixed(4)}`;
+        }
+
+        explanation = `Ada 2 cara: (1) Akar dulu: (${rootSymbol}${base})^${numerator} ATAU (2) Pangkat dulu: ${rootSymbol}(${base}^${numerator})`;
+      }
+
+      document.getElementById('fr-result').textContent = calculation;
+      document.getElementById('fr-explanation').textContent = explanation;
+
+      trackExperiment();
+    }
+
+    function setFractionExample(base, num, den) {
+      document.getElementById('fr-base').value = base;
+      document.getElementById('fr-numerator').value = num;
+      document.getElementById('fr-denominator').value = den;
+      calculateFractionRoot();
+    }
+
+    function getSuperscript(n) {
+      const superscripts = {
+        '0': '2⁻²', '1': '2⁻²', '2': '2⁻²', '3': '2⁻²', '4': '4',
+        '5': '5', '6': '6', '7': '7', '8': '8', '9': '?'
+      };
+      return n.toString().split('').map(d => superscripts[d] || d).join('');
+    }
+
+    // ==================== Inquiry Functions ====================
+    async function togglePhase(phaseId) {
+      const content = document.getElementById(`${phaseId}-content`);
+      const icon = document.getElementById(`${phaseId}-icon`);
+
+      if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        icon.textContent = '?';
+
+        if (!openPhases.includes(phaseId)) {
+          openPhases.push(phaseId);
+        }
+
+        // Track inquiry master badge
+        if (currentPlayer && openPhases.length >= 5 && !hasBadge('inquiry_master')) {
+          await addBadge('inquiry_master');
+        }
+      } else {
+        content.classList.add('hidden');
+        icon.textContent = '?';
+        openPhases = openPhases.filter(p => p !== phaseId);
+      }
+    }
+
+    // ==================== Player Functions ====================
+    async function registerPlayer() {
+      const nameInput = document.getElementById('player-name-input');
+      const name = nameInput.value.trim();
+
+      if (!name) {
+        showToast('Masukkan nama kamu dulu!', 'warning');
+        return;
+      }
+
+      const existingPlayer = allPlayers.find(p => p.player_name.toLowerCase() === name.toLowerCase());
+
+      if (existingPlayer) {
+        currentPlayer = existingPlayer;
+        showToast(`Selamat datang kembali, ${name}! 👋`, 'success');
+        updatePlayerUI();
+        return;
+      }
+
+      if (allPlayers.length >= 999) {
+        showToast('Maaf, batas maksimal pemain sudah tercapai (999 pemain)', 'error');
+        return;
+      }
+
+      const newPlayer = {
+        player_name: name,
+        total_score: 0,
+        level_1_score: 0,
+        level_2_score: 0,
+        level_3_score: 0,
+        level_1_completed: false,
+        level_2_completed: false,
+        level_3_completed: false,
+        badges: '',
+        video_watched: 0,
+        materials_read: '',
+        experiments_done: 0,
+        total_questions: 0,
+        correct_streak: 0,
+        inquiry_phases_read: '',
+        level_attempts: '',
+        cptp_read: false,
+        created_at: new Date().toISOString()
+      };
+
+      if (getStorage()) {
+        const result = await getStorage().create(newPlayer);
+        if (result.isOk) {
+          showToast(`Selamat datang, ${name}! 🎉`, 'success');
+          await addBadge('explorer');
+        } else {
+          showToast('Gagal mendaftar. Coba lagi!', 'error');
+        }
+      }
+    }
+
+    function updatePlayerUI() {
+      if (!currentPlayer) return;
+
+      document.getElementById('player-registration').innerHTML = `
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center text-2xl font-bold">
+              ${currentPlayer.player_name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <p class="font-bold text-lg">${currentPlayer.player_name}</p>
+              <p class="text-sm text-gray-400">Total Skor: ${currentPlayer.total_score || 0}</p>
+            </div>
+          </div>
+          <button onclick="logoutPlayer()" class="px-4 py-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors text-sm">
+            Keluar
+          </button>
+        </div>
+      `;
+
+      document.getElementById('total-score-display').textContent = currentPlayer.total_score || 0;
+      document.getElementById('user-score').classList.remove('hidden');
+
+      // Update level cards
+      updateLevelCards();
+      renderBadges();
+    }
+
+    function updateLevelCards() {
+      if (!currentPlayer) return;
+
+      // Level 1
+      const level1Card = document.getElementById('level-1-card');
+      const level1Score = currentPlayer.level_1_score || 0;
+      const level1Completed = currentPlayer.level_1_completed || false;
+
+      document.getElementById('level-1-score').textContent = `${level1Score}/1000`;
+      document.getElementById('level-1-progress').style.width = `${(level1Score / 1000) * 100}%`;
+      if (level1Completed) {
+        document.getElementById('level-1-status').textContent = '? Selesai';
+        document.getElementById('level-1-status').className = 'px-3 py-1 bg-green-500/30 rounded-full text-xs font-bold';
+      }
+
+      // Level 2
+      const level2Card = document.getElementById('level-2-card');
+      const level2Score = currentPlayer.level_2_score || 0;
+      const level2Completed = currentPlayer.level_2_completed || false;
+
+      if (level1Completed) {
+        level2Card.classList.remove('locked', 'opacity-50', 'cursor-not-allowed');
+        level2Card.classList.add('cursor-pointer');
+        document.getElementById('level-2-status').textContent = level2Completed ? '? Selesai' : 'Tersedia';
+        document.getElementById('level-2-status').className = level2Completed ? 'px-3 py-1 bg-green-500/30 rounded-full text-xs font-bold' : 'px-3 py-1 bg-yellow-500/30 rounded-full text-xs font-bold';
+      }
+
+      document.getElementById('level-2-score').textContent = `${level2Score}/1000`;
+      document.getElementById('level-2-progress').style.width = `${(level2Score / 1000) * 100}%`;
+
+      // Level 3
+      const level3Card = document.getElementById('level-3-card');
+      const level3Score = currentPlayer.level_3_score || 0;
+      const level3Completed = currentPlayer.level_3_completed || false;
+
+      if (level2Completed) {
+        level3Card.classList.remove('locked', 'opacity-50', 'cursor-not-allowed');
+        level3Card.classList.add('cursor-pointer');
+        document.getElementById('level-3-status').textContent = level3Completed ? '? Selesai' : 'Tersedia';
+        document.getElementById('level-3-status').className = level3Completed ? 'px-3 py-1 bg-green-500/30 rounded-full text-xs font-bold' : 'px-3 py-1 bg-purple-500/30 rounded-full text-xs font-bold';
+      }
+
+      document.getElementById('level-3-score').textContent = `${level3Score}/1000`;
+      document.getElementById('level-3-progress').style.width = `${(level3Score / 1000) * 100}%`;
+    }
+
+    function logoutPlayer() {
+      currentPlayer = null;
+      location.reload();
+    }
+
+    // ==================== Game Functions ====================
+    let currentHypothesis = '';
+    let isHintViewed = false;
+
+    function toggleHint() {
+      const hintSection = document.getElementById('hint-section');
+      const hintButton = document.getElementById('hint-button');
+
+      if (hintSection.classList.contains('hidden')) {
+        hintSection.classList.remove('hidden');
+        hintButton.textContent = '🙈 Sembunyikan Hint';
+        isHintViewed = true;
+      } else {
+        hintSection.classList.add('hidden');
+        hintButton.textContent = '💡 Lihat Hint';
+      }
+    }
+
+    function saveHypothesis() {
+      playClickSound();
+      const hypothesisInput = document.getElementById('hypothesis-input');
+      currentHypothesis = hypothesisInput.value.trim();
+
+      if (!currentHypothesis) {
+        showToast('Tuliskan hipotesismu terlebih dahulu!', 'warning');
+        return;
+      }
+
+      // Save hypothesis to player data
+      if (currentPlayer && getStorage()) {
+        currentPlayer.hypotheses_written = (currentPlayer.hypotheses_written || 0) + 1;
+      }
+
+      // Show options section
+      document.getElementById('options-section').classList.remove('hidden');
+      document.getElementById('save-hypothesis-btn').disabled = true;
+      document.getElementById('save-hypothesis-btn').classList.add('opacity-50', 'cursor-not-allowed');
+      hypothesisInput.disabled = true;
+
+      showToast('Hipotesis tersimpan! Silakan pilih jawaban 👍', 'success');
+    }
+
+    function startLevel(level) {
+      playClickSound();
+      if (!currentPlayer) {
+        showToast('Daftar dulu sebelum bermain!', 'warning');
+        return;
+      }
+
+      if (level === 2 && !currentPlayer.level_1_completed) {
+        showToast('Selesaikan Level 1 terlebih dahulu!', 'warning');
+        return;
+      }
+
+      if (level === 3 && !currentPlayer.level_2_completed) {
+        showToast('Selesaikan Level 2 terlebih dahulu!', 'warning');
+        return;
+      }
+
+      currentLevel = level;
+      currentQuestionIndex = 0;
+      levelScore = 0;
+      correctAnswers = 0;
+      wrongAnswers = 0;
+      timeRemaining = 300;
+      levelStartTime = Date.now();
+
+      // Shuffle questions
+      currentQuestions = [...questionBank[level]].sort(() => Math.random() - 0.5);
+
+      // Track level attempt
+      const attempts = currentPlayer.level_attempts ? currentPlayer.level_attempts.split(',').filter(a => a) : [];
+      attempts.push(`level${level}_${Date.now()}`);
+      currentPlayer.level_attempts = attempts.join(',');
+
+      showSection('game');
+
+      const levelTitles = {
+        1: 'Perpangkatan Dasar',
+        2: 'Pangkat Nol & Negatif',
+        3: 'Pangkat Pecahan & Akar'
+      };
+
+      document.getElementById('current-level-display').textContent = level;
+      document.getElementById('level-title').textContent = levelTitles[level];
+      document.getElementById('game-score').textContent = '0';
+      document.getElementById('correct-count').textContent = '0';
+      document.getElementById('wrong-count').textContent = '0';
+
+      loadQuestion();
+      startTimer();
+      playQuestionBgm();
+    }
+
+    function loadQuestion() {
+      if (currentQuestionIndex >= currentQuestions.length) {
+        endLevel();
+        return;
+      }
+
+      const question = currentQuestions[currentQuestionIndex];
+
+      // Reset hypothesis section
+      currentHypothesis = '';
+      isHintViewed = false;
+      document.getElementById('hypothesis-input').value = '';
+      document.getElementById('hypothesis-input').disabled = false;
+      document.getElementById('save-hypothesis-btn').disabled = false;
+      document.getElementById('save-hypothesis-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+      document.getElementById('options-section').classList.add('hidden');
+      document.getElementById('hint-section').classList.add('hidden');
+      document.getElementById('hint-button').textContent = '💡 Lihat Hint';
+
+      // Load question content
+      document.getElementById('current-question-num').textContent = currentQuestionIndex + 1;
+      document.getElementById('question-progress').style.width = `${((currentQuestionIndex + 1) / currentQuestions.length) * 100}%`;
+      document.getElementById('orientation-text').textContent = question.orientation || 'Pahami konteks masalah ini dengan baik.';
+      document.getElementById('question-text').textContent = question.q;
+      document.getElementById('hint-text').textContent = question.hint || 'Pikirkan langkah-langkah penyelesaiannya.';
+      document.getElementById('feedback-container').classList.add('hidden');
+
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = question.options.map((option, index) => `
+        <button onclick="checkAnswer(${index})" class="option-btn w-full bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 rounded-xl p-4 text-left hover:bg-indigo-500/30 transition-all">
+          <span class="font-bold text-indigo-300">${String.fromCharCode(65 + index)}.</span> ${option}
+        </button>
+      `).join('');
+    }
+
+    function checkAnswer(selectedIndex) {
+      playClickSound();
+      const question = currentQuestions[currentQuestionIndex];
+      const isCorrect = selectedIndex === question.correct;
+
+      // Disable all buttons
+      document.querySelectorAll('.option-btn').forEach(btn => btn.disabled = true);
+
+      // Update stats
+      if (isCorrect) {
+        correctAnswers++;
+        levelScore += 100;
+        currentPlayer.correct_streak = (currentPlayer.correct_streak || 0) + 1;
+        document.getElementById('correct-count').textContent = correctAnswers;
+        showFeedback(true, question.explanation);
+      } else {
+        wrongAnswers++;
+        currentPlayer.correct_streak = 0;
+        document.getElementById('wrong-count').textContent = wrongAnswers;
+        showFeedback(false, question.explanation);
+      }
+
+      currentPlayer.total_questions = (currentPlayer.total_questions || 0) + 1;
+      document.getElementById('game-score').textContent = levelScore;
+
+      setTimeout(() => {
+        currentQuestionIndex++;
+        loadQuestion();
+      }, 3000);
+    }
+
+    function showFeedback(isCorrect, explanation) {
+      const container = document.getElementById('feedback-container');
+      container.classList.remove('hidden');
+
+      if (isCorrect) {
+        container.className = 'rounded-xl p-6 mb-6 bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/30';
+        document.getElementById('feedback-title').textContent = '✓ Benar!';
+        document.getElementById('feedback-title').className = 'text-xl font-bold mb-2 text-green-400';
+      } else {
+        container.className = 'rounded-xl p-6 mb-6 bg-gradient-to-r from-red-500/20 to-rose-500/20 border border-red-500/30';
+        document.getElementById('feedback-title').textContent = 'X Salah';
+        document.getElementById('feedback-title').className = 'text-xl font-bold mb-2 text-red-400';
+      }
+
+      document.getElementById('feedback-text').textContent = explanation;
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+
+        const minutes = Math.floor(timeRemaining / 60);
+        const seconds = timeRemaining % 60;
+        const timerDisplay = document.getElementById('timer-display');
+        timerDisplay.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+        if (timeRemaining <= 60) {
+          timerDisplay.classList.add('timer-warning', 'text-red-400');
+        }
+
+        if (timeRemaining <= 0) {
+          clearInterval(timerInterval);
+          endLevel();
+        }
+      }, 1000);
+    }
+
+    async function endLevel() {
+      clearInterval(timerInterval);
+      stopQuestionBgm();
+
+      const timeTaken = Math.floor((Date.now() - levelStartTime) / 1000);
+      const timeBonus = Math.max(0, Math.floor((300 - timeTaken) / 10) * 10);
+      const finalScore = levelScore + timeBonus;
+
+      // Update player data
+      currentPlayer[`level_${currentLevel}_score`] = Math.max(currentPlayer[`level_${currentLevel}_score`] || 0, finalScore);
+      currentPlayer[`level_${currentLevel}_completed`] = true;
+
+      // Recalculate total score
+      currentPlayer.total_score = (currentPlayer.level_1_score || 0) +
+        (currentPlayer.level_2_score || 0) +
+        (currentPlayer.level_3_score || 0);
+
+      if (getStorage()) {
+        await getStorage().update(currentPlayer);
+      }
+
+      // Check for badges
+      await checkBadgesAfterLevel(currentLevel, finalScore, timeTaken);
+
+      // Show results
+      showSection('home');
+      updatePlayerUI();
+
+      showToast(`Level ${currentLevel} selesai! Skor: ${finalScore} (Bonus waktu: ${timeBonus})`, 'success');
+    }
+
+    function exitGame() {
+      clearInterval(timerInterval);
+      stopQuestionBgm();
+      showSection('home');
+    }
+
+    // ==================== Section Navigation ====================
+    function showSection(sectionName) {
+      document.querySelectorAll('section').forEach(section => {
+        section.classList.add('hidden');
+      });
+      document.getElementById(`${sectionName}-section`).classList.remove('hidden');
+
+      if (sectionName !== 'game') {
+        stopQuestionBgm();
+      }
+
+      if (sectionName === 'leaderboard') {
+        renderLeaderboard();
+      }
+
+      // Track CP/TP visit
+      if (sectionName === 'cptp' && currentPlayer && !currentPlayer.cptp_read) {
+        trackCPTPRead();
+      }
+    }
+
+    async function trackCPTPRead() {
+      if (!currentPlayer || !getStorage()) return;
+
+      currentPlayer.cptp_read = true;
+      await getStorage().update(currentPlayer);
+
+      if (!hasBadge('scholar')) {
+        await addBadge('scholar');
+      }
+    }
+
+    function renderLeaderboard() {
+      const container = document.getElementById('leaderboard-content');
+      if (!container) return;
+
+      const sortedPlayers = [...allPlayers].sort((a, b) => (b.total_score || 0) - (a.total_score || 0));
+
+      if (sortedPlayers.length === 0) {
+        container.innerHTML = '<p class="text-gray-400 text-center py-8">Belum ada pemain yang terdaftar</p>';
+        return;
+      }
+
+      container.innerHTML = sortedPlayers.slice(0, 10).map((player, index) => {
+        const medals = ['🥇', '🥈', '🥉'];
+        const medal = index < 3 ? medals[index] : `${index + 1}.`;
+        const badgeCount = player.badges ? player.badges.split(',').filter(b => b).length : 0;
+
+        return `
+          <div class="card-glass rounded-xl p-4 flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="text-3xl w-12 text-center">${medal}</div>
+              <div>
+                <p class="font-bold text-lg">${player.player_name}</p>
+                <p class="text-sm text-gray-400">🏅 ${badgeCount} badges</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <p class="text-2xl font-bold text-yellow-400">${player.total_score || 0}</p>
+              <p class="text-xs text-gray-400">
+                L1: ${player.level_1_score || 0} | 
+                L2: ${player.level_2_score || 0} | 
+                L3: ${player.level_3_score || 0}
+              </p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ==================== Toast Function ====================
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+
+      const colors = {
+        success: 'from-green-500 to-emerald-500',
+        error: 'from-red-500 to-rose-500',
+        info: 'from-blue-500 to-cyan-500',
+        warning: 'from-yellow-500 to-orange-500'
+      };
+
+      toast.className = `toast bg-gradient-to-r ${colors[type]} px-4 py-3 rounded-lg shadow-lg text-sm font-medium`;
+      toast.textContent = message;
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // ==================== Data SDK Handler ====================
+    const dataHandler = {
+      onDataChanged(data) {
+        allPlayers = data;
+
+        if (currentPlayer) {
+          const updatedPlayer = data.find(p => p.__backendId === currentPlayer.__backendId);
+          if (updatedPlayer) {
+            currentPlayer = updatedPlayer;
+            updatePlayerUI();
+          }
+        }
+      }
+    };
+
+    // ==================== Initialization ====================
+    async function initApp() {
+      try {
+        // Initialize offline storage (localStorage)
+        if (window.offlineStorage) {
+          const initResult = await window.offlineStorage.init(dataHandler);
+          if (!initResult.isOk) {
+            console.warn('[XnRoot] Storage init had issues, but continuing...');
+          } else {
+            console.log('[XnRoot] Offline storage initialized successfully');
+          }
+        } else {
+          console.error('[XnRoot] Offline storage not available!');
+        }
+
+        // Initialize material display
+        showMaterial('dasar');
+        renderBadges();
+
+        // Update storage stats on developer page
+        updateStorageStats();
+
+        setTimeout(() => {
+          document.getElementById('loading-screen').style.display = 'none';
+          console.log('[XnRoot] App ready! (Offline Mode)');
+        }, 800);
+      } catch (error) {
+        console.error('[XnRoot] Init error:', error);
+        document.getElementById('loading-screen').style.display = 'none';
+        showToast('Aplikasi siap digunakan!', 'info');
+      }
+    }
+
+    // ==================== Storage Manager Functions ====================
+    function updateStorageStats() {
+      if (window.offlineStorage) {
+        const stats = window.offlineStorage.getStats();
+        document.getElementById('storage-total-players').textContent = stats.totalPlayers;
+        document.getElementById('storage-size').textContent = `${stats.storageUsed} bytes`;
+        document.getElementById('storage-mode-display').textContent = 'Offline (LocalStorage)';
+      }
+    }
+
+    function exportStorageData() {
+      if (!window.offlineStorage) {
+        showToast('Offline storage tidak tersedia', 'error');
+        return;
+      }
+
+      const data = window.offlineStorage.exportData();
+      if (!data) {
+        showToast('Gagal export data', 'error');
+        return;
+      }
+
+      // Create download link
+      const blob = new Blob([data], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `xnroot_backup_${new Date().toISOString().split('T')[0]}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      showToast('Data berhasil di-export! 📥', 'success');
+    }
+
+    function importStorageData(input) {
+      const file = input.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const jsonData = e.target.result;
+          if (window.offlineStorage && window.offlineStorage.importData(jsonData)) {
+            showToast('Data berhasil di-import! 📤', 'success');
+            updateStorageStats();
+
+            // Refresh current player if needed
+            if (currentPlayer) {
+              location.reload();
+            }
+          } else {
+            showToast('Gagal import data', 'error');
+          }
+        } catch (error) {
+          console.error('Import error:', error);
+          showToast('File tidak valid', 'error');
+        }
+      };
+      reader.readAsText(file);
+
+      // Reset input
+      input.value = '';
+    }
+
+    function clearStorageData() {
+      if (!confirm('Yakin ingin menghapus semua data? Tindakan ini tidak dapat dibatalkan!')) {
+        return;
+      }
+
+      if (window.offlineStorage && window.offlineStorage.clearAll()) {
+        showToast('Semua data telah dihapus! 🗑️', 'success');
+        updateStorageStats();
+        currentPlayer = null;
+        location.reload();
+      } else {
+        showToast('Gagal menghapus data', 'error');
+      }
+    }
+
+    // Start the app
+    initApp();
+  </script>
+
+</body>
+
+</html>
